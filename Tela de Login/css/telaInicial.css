@@ -1,11 +1,36 @@
 .esquerda {
-    background-color: #AFEEEE;
+    position: relative;
+    overflow: visible;
+
+    background-color: black;
+}
+
+.esquerda img{
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 130%;
     height: 100vh;
+
+    object-fit: cover;
+
+    z-index: 2;
 }
 
 .direita {
     background-color: black;
     height: 100vh;
+    position: relative;
+}
+
+.logo {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+
+    width: 130px; /* ajuste conforme necessário */
+    height: auto;
 }
 
 .central {
@@ -21,7 +46,7 @@
 
 .subtitulo {
     color:white;
-    margin: -5px 0 35px;
+    margin: -5px 0 25px;
     line-height:1.6;
     opacity: 60%;
 }
@@ -29,6 +54,7 @@
 label {
     padding-top: 5px;
     margin-top: 7px;
+    margin-bottom: 7px;
     color: white;
     opacity: 65%;
     font-size: 15px;
@@ -47,8 +73,38 @@ input {
 }
 
 input::placeholder {
-    color: black;
+    color: #005B5C;
     opacity: 35%;
+}
+
+.input-box{
+    display: flex;
+    align-items: center;
+
+    width: 400px;
+    height: 50px;
+
+    background: #AFEEEE;
+    border-radius: 20px;
+
+    padding: 0 15px;
+}
+
+.input-box input{
+    flex: 1;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    margin: 0;
+    padding-left: 10px;
+}
+
+i {
+    color: #005B5C;
+    font-size: 18px;
 }
 
 button {
