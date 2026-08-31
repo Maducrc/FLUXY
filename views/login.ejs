@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Fluxy - Login</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <!-- CSS do Fluxy -->
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+
+<body>
+
+    <div class="container-fluid">
+
+        <div class="row vh-100">
+
+            <div class="col-5 esquerda">
+                <img src="/img/IMG1TI.png" alt="Ilustração">
+            </div>
+
+            <div class="col-7 direita d-flex justify-content-center align-items-center">
+
+                <header class="menu-topo">
+
+                    <nav>
+                        <a href="/" class="ativo">Início</a>
+                        <a href="/sobre">Sobre Nós</a>
+                    </nav>
+
+                    <img src="/img/logo.png" class="logo" alt="Fluxy">
+
+                </header>
+
+                <div class="central">
+
+                    <div class="recep">
+
+                        <div class="titulo">
+                            Bem-vindo(a) de volta
+                        </div>
+
+                        <div class="subtitulo">
+                            Acompanhe as novidades e mantenha sua equipe sempre conectada.
+                        </div>
+
+                    </div>
+
+                    <form id="loginForm">
+
+                        <label for="usuario">Usuário</label>
+
+                        <div class="input-box">
+
+                            <i class="bi bi-person-fill"></i>
+
+                            <input 
+                                type="text" 
+                                id="usuario"
+                                name="usuario"
+                                placeholder="Digite seu Usuário"
+                            >
+
+                        </div>
+
+                        <label for="senha">Senha</label>
+
+                        <div class="input-box">
+
+                            <i class="bi bi-lock-fill"></i>
+
+                            <input 
+                                type="password" 
+                                id="senha"
+                                name="senha"
+                                placeholder="Digite sua Senha"
+                            >
+
+                            <i class="bi bi-eye-slash-fill" id="toggleSenha"></i>
+
+                        </div>
+
+                        <p id="mensagem"></p>
+
+                        <button type="submit">
+                            Login
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="/js/login.js"></script>
+
+</body>
+
+</html>

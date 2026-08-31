@@ -1,0 +1,30 @@
+CREATE DATABASE fluxy; 
+USE fluxy; 
+
+CREATE TABLE empresas (
+id INT AUTO_INCREMENT PRIMARY KEY,
+empresa VARCHAR (100) NOT NULL UNIQUE
+);
+
+CREATE TABLE setores (
+id INT AUTO_INCREMENT PRIMARY KEY,
+setor VARCHAR (100) NOT NULL UNIQUE, 
+empresa_id INT NOT NULL,
+
+FOREIGN KEY (empresa_id) REFERENCES empresas(id)
+);
+
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    usuario VARCHAR(50) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    empresa_id INT NOT NULL,
+    setor_id INT NOT NULL,
+
+    FOREIGN KEY (empresa_id)
+        REFERENCES empresas(id),
+
+    FOREIGN KEY (setor_id)
+        REFERENCES setores(id)
+);

@@ -1,0 +1,27 @@
+{
+  "name": "fluxy",
+  "version": "1.0.0",
+  "description": "A **Fluxy** é uma plataforma web desenvolvida como proposta prática do TCC **“Cultura de Colaboração e Tecnologia: Métodos Ágeis e Trabalho em Equipe”**.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Maducrc/FLUXY.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Maducrc/FLUXY/issues"
+  },
+  "homepage": "https://github.com/Maducrc/FLUXY#readme",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "mysql2": "^3.24.2"
+  }
+}
