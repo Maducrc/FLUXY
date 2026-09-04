@@ -1,0 +1,511 @@
+@import url("variaveis.css");
+
+.layout {
+    display: grid;
+
+    grid-template-columns: 270px 1fr 220px;
+
+    min-height: 100vh;
+
+    background-color: var(--fundo);
+}
+
+.sidebar {
+    background-color: #151719;
+
+    border-right: 1px solid var(--borda);
+
+    padding: 25px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.logo img {
+    width: 150px;
+
+    margin: 10px auto 40px;
+
+    display: block;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 13px 15px;
+
+    border-radius: 12px;
+
+    color: white;
+
+    text-decoration: none;
+
+    transition: 0.3s;
+}
+
+.menu-item.ativo {
+    background-color: var(--ciano);
+
+    color: var(--azul-petroleo);
+}
+
+.menu-item:hover {
+    background-color: rgba(103, 232, 249, 0.15);
+
+    color: var(--ciano);
+}
+
+.titulo-setores {
+    color: var(--turquesa);
+
+    font-size: 13px;
+    font-weight: 600;
+
+    margin: 25px 0 5px;
+}
+
+.conteudo {
+    padding: 30px 25px;
+
+    min-width: 0;
+}
+
+.topo {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 30px;
+}
+
+.topo h1 {
+    color: var(--turquesa);
+
+    font-size: 22px;
+
+    margin: 0;
+}
+
+.topo p {
+    color: white;
+
+    opacity: 0.5;
+
+    font-size: 12px;
+
+    margin: 4px 0 0;
+}
+
+.usuario-topo {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+.usuario-topo > i {
+    color: white;
+
+    font-size: 20px;
+
+    margin-right: 15px;
+}
+
+.avatar {
+    width: 45px;
+    height: 45px;
+
+    border-radius: 50%;
+
+    background-color: var(--ciano);
+
+    color: var(--azul-petroleo);
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.usuario-topo strong {
+    display: block;
+
+    color: white;
+
+    font-size: 11px;
+}
+
+.usuario-topo small {
+    color: white;
+
+    opacity: 0.5;
+
+    font-size: 8px;
+}
+
+.lateral {
+    padding: 30px 20px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 15px;
+}
+
+.card-lateral {
+    background-color: var(--card);
+
+    border-radius: 12px;
+
+    padding: 15px;
+
+    min-height: 150px;
+}
+
+.card-lateral h2 {
+    color: var(--ciano);
+
+    font-size: 12px;
+
+    margin: 0;
+}
+
+.novo-comunicado {
+    width: 100%;
+
+    background-color: var(--card);
+
+    border-radius: 12px;
+
+    padding: 14px;
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 15px;
+
+    margin-bottom: 25px;
+}
+
+.avatar-comunicado {
+    width: 48px;
+    height: 48px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background-color: var(--ciano);
+
+    color: var(--azul-petroleo);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
+}
+
+.comunicado-conteudo {
+    width: 100%;
+}
+
+.comunicado-conteudo textarea {
+    width: 100%;
+
+    height: 45px;
+
+    resize: none;
+
+    background-color: transparent;
+
+    border: none;
+
+    outline: none;
+
+    color: white;
+
+    font-size: 12px;
+
+    padding: 8px 0;
+}
+
+.comunicado-conteudo textarea::placeholder {
+    color: white;
+
+    opacity: 0.45;
+}
+
+.comunicado-acoes {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 15px;
+
+    margin-top: 5px;
+}
+
+.icones-comunicado {
+    display: flex;
+
+    gap: 10px;
+}
+
+.icones-comunicado button {
+    background: transparent;
+
+    border: none;
+
+    color: var(--ciano);
+
+    font-size: 17px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.icones-comunicado button:hover {
+    color: var(--turquesa);
+
+    transform: scale(1.1);
+}
+
+.btn-publicar {
+    border: none;
+
+    background-color: var(--ciano);
+
+    color: var(--azul-petroleo);
+
+    border-radius: 20px;
+
+    padding: 8px 20px;
+
+    font-size: 11px;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+.btn-publicar:hover {
+    background-color: var(--turquesa);
+
+    transform: translateY(-1px);
+}
+
+.feed {
+    width: 100%;
+}
+
+.feed-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 15px;
+}
+
+.feed-topo h2 {
+    color: var(--turquesa);
+
+    font-size: 18px;
+
+    margin: 0;
+}
+
+.filtro {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: white;
+
+    font-size: 11px;
+
+    opacity: 0.7;
+}
+
+.filtro select {
+    background: transparent;
+
+    border: none;
+    outline: none;
+
+    color: white;
+
+    font-size: 11px;
+
+    cursor: pointer;
+}
+
+.filtro select option {
+    background-color: var(--card);
+
+    color: white;
+}
+
+.lista-comunicados {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.comunicado {
+    display: flex;
+
+    gap: 15px;
+
+    width: 100%;
+
+    padding: 16px;
+
+    background-color: var(--card);
+
+    border-radius: 12px;
+
+    transition: 0.2s;
+}
+
+.comunicado:hover {
+    transform: translateY(-2px);
+
+    background-color: #1d2024;
+}
+
+.icone-comunicado {
+    width: 55px;
+    height: 55px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background-color: var(--ciano);
+
+    color: var(--azul-petroleo);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+}
+
+.comunicado-info {
+    width: 100%;
+}
+
+.comunicado-cabecalho {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+}
+
+.comunicado-cabecalho h3 {
+    color: var(--ciano);
+
+    font-size: 12px;
+
+    margin: 0 0 3px;
+}
+
+.comunicado-cabecalho span {
+    color: white;
+
+    opacity: 0.5;
+
+    font-size: 9px;
+}
+
+.mostrar-mais {
+    background: transparent;
+
+    border: none;
+
+    color: var(--ciano);
+
+    font-size: 17px;
+
+    cursor: pointer;
+}
+
+.comunicado-info p {
+    color: white;
+
+    opacity: 0.8;
+
+    font-size: 11px;
+
+    line-height: 1.4;
+
+    margin: 10px 0;
+}
+
+.comunicado-rodape {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+}
+
+.tag {
+    background-color: #005B5C;
+
+    color: var(--ciano);
+
+    border-radius: 15px;
+
+    padding: 4px 12px;
+
+    font-size: 8px;
+}
+
+.tag.importante {
+    background-color: #005B5C;
+
+    color: var(--ciano);
+}
+
+.interacoes {
+    display: flex;
+
+    gap: 12px;
+
+    color: white;
+
+    opacity: 0.6;
+
+    font-size: 10px;
+}
+
+.interacoes span {
+    display: flex;
+
+    align-items: center;
+
+    gap: 4px;
+}

@@ -1,0 +1,238 @@
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" href="/css/inicio.css">
+    <link rel="stylesheet" href="/css/variaveis"> 
+
+<body>
+
+    <div class="layout">
+        
+        <!-- Inicio SideBar-->
+        <aside class="sidebar">
+
+            <div class="logo">
+                <img src="/img/logo.png" alt="Fluxy">
+            </div>
+
+            <nav class="menu">
+
+                <a href="#" class="menu-item ativo">
+                    <i></i>
+                    <span>Geral</span>
+                </a>
+
+                <a href="#" class="menu-item">
+                    <i></i>
+                    <span>Acompanhamentos</span>
+                </a>
+
+                <div class="setor">
+
+                    <a href="#" class="menu-item">
+                        <i></i>
+                        <span><%= usuario.setor %></span>
+                    </a>
+
+                     <a href="#" class="menu-item">
+                        <i></i>
+                        <span>Visão Geral do Setor</span>
+                    </a>
+
+                    <a href="#" class="menu-item">
+                        <i></i>
+                        <span>Calendario</span>
+                    </a>
+
+                    <a href="#" class="menu-item">
+                        <i></i>
+                        <span>Pendências</span>
+                    </a>
+
+                    <a href="#" class="menu-item">
+                        <i></i>
+                        <span>Indicadores</span>
+                    </a>
+
+                </div>
+
+            </nav>
+
+            <div class="menu-final">
+
+                 <a href="#" class="menu-item">
+                        <i></i>
+                        <span>Configurações</span>
+                </a>
+
+                 <a href="#" class="menu-item">
+                        <i></i>
+                        <span>Sair</span>
+                </a>
+
+            </div>
+
+        </aside>
+        <!-- Fim SideBar-->
+
+        <!-- Inicio Conteúdo Principal-->
+         <main class="conteudo">
+
+            <header class="topo">
+
+                <div>
+                    <h1>Geral</h1>
+                    <p>Comunicação Entre Todos os Setores</p>
+                </div>
+
+                <div class="usuario-topo">
+
+                    <i></i>
+                    <div class="avatar"> <%= usuario.sigla %></div>
+
+                    <div>
+                        <strong> <%= usuario.nome %></strong>
+                        <small> <%= usuario.setor%></small>
+                    </div>
+
+                </div>
+            
+            </header>
+
+            <section class="novo-comunicado">
+
+                <div class="avatar-comunicado">
+                    <%= usuario.sigla %>
+                </div>
+
+                <div class="comunicado-conteudo">
+
+                    <textarea placeholder="Compartilhe um novo comunicado com todos os setores..."></textarea>
+
+                    <div class="comunicado-acoes">
+
+                        <div class="icones-comunicado">
+
+                            <button type="button">
+                                <i class="bi bi-paperclip"></i>
+                            </button>
+
+                             <button type="button">
+                                <i class="bi bi-emoji-smile"></i>
+                            </button>
+
+                        </div>
+
+                         <button type="button" class="btn-publicar">Publicar</button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section class="feed">
+
+                <div class="feed-topo"> 
+
+                    <h2>Feed Geral</h2>
+
+                    <div class="filtro">
+
+                        <span>Filtrar:</span>
+                        <select>
+                            <option>Todos</option>
+                            <option>Comercial</option>
+                            <option>Financeiro</option>
+                            <option>Recursos Humanos</option>
+                            <option>Marketing</option>
+                            <option>TI</option>
+                            <option>Operações</option>
+                            <option>Suporte</option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <div class="lista-comunicados">
+
+                    <article class="comunicado">
+
+                        <div class="icone-comunicado">
+                            <i class="bi bi-megaphone"></i>
+                        </div>
+
+                        <!-- Provisório -->
+                        <div class="comunicado-info">
+
+                            <div class="comunicado-cabecalho">
+
+                                <div>
+                                    <h3>Nova Campanha no Ar</h3>
+                                    <span>Marketing - 10h30</span>
+                                </div>
+
+                                <button class="mostrar-mais">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+
+                            </div>
+
+                            <p>
+                            Nova campanha no ar! Confira os materiais
+                            atualizados e siga o cronograma de divulgação.
+                            </p>
+
+                            <div class="comunicado-rodape">
+
+                                <span class="tag"> Aviso </span>
+
+                                <div class="interacoes">
+
+                                    <span>
+                                        <i class="bi bi-hand-thumbs-up"></i>
+                                        18
+                                    </span>
+
+                                    <span>
+                                        <i class="bi bi-chat-square"></i>
+                                        5
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </section>
+
+        </main>
+
+        <aside class="laretal">
+
+            <section class="card-lateral">
+                <h2>Agenda Geral</h2>
+            </section>
+
+            <section class="card-lateral">
+                <h2>Pendências Entre Setores</h2>
+            </section>
+
+            <section class="card-lateral">
+                <h2>Ações Rápidas</h2>
+            </section>
+
+        </aside>
+
+    </div>
+
+</body>

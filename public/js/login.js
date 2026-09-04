@@ -50,7 +50,7 @@ formulario.addEventListener("submit", async (event) => {
     const dados = await resposta.json();
 
     if(dados.sucesso) {
-        mensagem.textContent = dados.mensagem;
+        window.location.href = "/dashboard";
     }
 
     else {
