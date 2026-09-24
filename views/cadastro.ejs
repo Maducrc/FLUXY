@@ -8,12 +8,20 @@
 
     <input type="text" id="sigla" placeholder="Sigla">
 
-    <select id="empresa">
+    <select id="empresa" name="empresa" class="form-select">
+    
         <option value="">Selecione uma empresa</option>
+
+        <% empresas.forEach(empresa => { %>
+        <option value="<%= empresa.id %>"><%= empresa.empresa %></option>
+        <% }); %>
+
     </select>
 
     <select id="setor">
-        <option value="">Selecione um setor</option>
+          <option value="1">Administrativo</option>
+          <option value="2">Marketing</option>
+          <option value="3">Tecnologia da Informação</option>
     </select>
 
     <button type="submit">

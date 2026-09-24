@@ -426,17 +426,13 @@
 
 .comunicado-cabecalho h3 {
     color: var(--ciano);
-
     font-size: 12px;
-
     margin: 0 0 3px;
 }
 
 .comunicado-cabecalho span {
     color: white;
-
     opacity: 0.5;
-
     font-size: 9px;
 }
 

@@ -1,8 +1,11 @@
+console.log("🔥 CADASTRO.JS FOI CARREGADO!");
 const formulario = document.getElementById("cadastroForm");
 
-formulario.addEventListener("submit", (event) => {
+formulario.addEventListener("submit", async (event) => {
 
     event.preventDefault();
+
+    console.log("🔥 FORMULÁRIO FOI ENVIADO!");
 
     const nome = document.getElementById("nome").value;
     const usuario = document.getElementById("usuario").value;
@@ -11,11 +14,23 @@ formulario.addEventListener("submit", (event) => {
     const setor = document.getElementById("setor").value;
     const sigla = document.getElementById("sigla").value;
 
-    console.log("Nome:", nome);
-    console.log("Usuário:", usuario);
-    console.log("Senha:", senha);
-    console.log("Sigla:", sigla);
-    console.log("Empresa:", empresa);
-    console.log("Setor:", setor);
+    const resposta = await fetch("/cadastro", {
+        method: "POST", 
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            nome, 
+            usuario, 
+            senha,
+            sigla, 
+            empresa, 
+            setor
+        })
+    });
+
+    const dados = await resposta.json();
+
+    console.log(dados);
 
 });

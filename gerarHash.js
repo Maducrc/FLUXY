@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const { hash } = require("crypto");
 const { hasUncaughtExceptionCaptureCallback } = require("process");
 
-const senha = "041108";
+const senha = "987654";
 
 bcrypt.hash(senha, 10, (erro, hash) => {
 

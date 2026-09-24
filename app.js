@@ -29,12 +29,123 @@ function verificarLogin(req, res, next) {
 }
 
 app.get("/cadastro", (req, res) => {
-    res.render("cadastro");
-    console.log("tela de casdatro funcionando");
+
+    const sql  = "SELECT * FROM empresas";
+
+    db.query(sql, (erro, empresas) => {
+        
+        if(erro) {
+            console.log("Erro ao buscar empresas:", erro);
+            return res.status(500).send("Erro ao carregar empresas.");
+        }
+
+        res.render("cadastro", {
+            empresas: empresas
+        });
+    });
 });
 
 app.get("/", (req, res) => {
     res.render("login");
+});
+
+//Cadastro "Postando"
+app.post("/cadastro", async (req, res) =>{
+
+    const {
+        nome, 
+        usuario,
+        senha, 
+        empresa, 
+        setor,
+        sigla
+    } = req.body;
+
+    console.log("DADOS RECEBIDOS NO CADASTRO:");
+    console.log("Nome:", nome);
+    console.log("Usuário:", usuario);
+    console.log("Senha:", senha);
+    console.log("Sigla:", sigla);
+    console.log("Empresa:", empresa);
+    console.log("Setor:", setor);
+
+    try {
+
+        //Criptografia Hash
+        const senhaHash = await bcrypt.hash(senha, 10);
+
+        const sql = `
+            INSERT INTO usuarios 
+            (nome, usuario, senha, empresa_id, setor_id, sigla)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+
+        db.query(
+            sql, 
+            [nome, usuario, senhaHash, empresa, setor, sigla],
+            (erro, resultado) => {
+
+                if(erro) {
+                  console.error("ERRO COMPLETO DO MYSQL:");
+                  console.error(erro);
+
+                  return res.status(500).json({
+                        sucesso: false,
+                        mensagem: erro.message
+                    });
+                }
+
+                res.json({
+                    sucesso: true, 
+                    mensagem: "Usuário cadastrado com sucesso!"
+                });
+            }
+        ); 
+    } 
+
+    catch (erro) {
+
+        console.error("Erro ao criptografar senha:", erro);
+
+        res.status(500).json({
+            sucesso: false,
+            mensagem: "Erro interno do servidor."
+        });
+    }
+});
+
+app.post("/publicacoes", (req, res) => {
+
+    const { conteudo, tipo } = req.body;
+
+    const usuarioId = req.session.usuario.id;
+
+    const sql = `
+        INSERT INTO publicacoes
+        (usuario_id, conteudo, tipo)
+        VALUES (?, ?, ?)
+    `;
+
+    db.query(
+        sql,
+        [usuarioId, conteudo, tipo],
+        (erro, resultado) => {
+
+            if (erro) {
+                console.error("Erro ao criar publicação:", erro);
+
+                return res.status(500).json({
+                    sucesso: false,
+                    mensagem: "Erro ao publicar."
+                });
+            }
+
+            res.json({
+                sucesso: true,
+                mensagem: "Publicação criada com sucesso!"
+            });
+        }
+    );
 });
 
 //login lógica com senha hash 
