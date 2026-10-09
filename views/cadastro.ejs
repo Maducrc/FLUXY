@@ -1,16 +1,18 @@
+<link rel="stylesheet" href="/css/cadastro.css">
+
 <form id="cadastroForm">
 
-    <input type="text" id="nome" placeholder="Nome">
+    <input type="text" id="nome" placeholder="Nome" required>
 
-    <input type="text" id="usuario" placeholder="Usuário">
+    <input type="text" id="usuario" placeholder="Usuário" required>
 
-    <input type="password" id="senha" placeholder="Senha">
+    <input type="password" id="senha" placeholder="Senha" required>
 
-    <input type="text" id="sigla" placeholder="Sigla">
+    <input type="text" id="sigla" placeholder="Sigla" required>
 
     <select id="empresa" name="empresa" class="form-select">
     
-        <option value="">Selecione uma empresa</option>
+        <option value="">Selecione uma empresa: </option>
 
         <% empresas.forEach(empresa => { %>
         <option value="<%= empresa.id %>"><%= empresa.empresa %></option>
@@ -18,10 +20,8 @@
 
     </select>
 
-    <select id="setor">
-          <option value="1">Administrativo</option>
-          <option value="2">Marketing</option>
-          <option value="3">Tecnologia da Informação</option>
+    <select id="setor" name="setor" class="form-select" required disabled>
+        <option value="">Selecione primeiro uma empresa</option>
     </select>
 
     <button type="submit">

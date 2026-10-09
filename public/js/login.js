@@ -49,13 +49,21 @@ formulario.addEventListener("submit", async (event) => {
 
     const dados = await resposta.json();
 
-    if(dados.sucesso) {
-        window.location.href = "/dashboard";
+    console.log("Resposta Login:", dados);
+
+  if(dados.sucesso) {
+    if(dados.perfil === "administrador") {
+        window.location.href = "/admin";
     }
 
     else {
-        mensagem.textContent = dados.mensagem;
+        window.location.href = "/dashboard";
     }
+  }
+
+  else {
+    mensagem.textContent = dados.mensagem;
+  }
 });
 
 const mensagem = document.getElementById("mensagem");

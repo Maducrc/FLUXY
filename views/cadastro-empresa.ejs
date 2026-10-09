@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Empresas | Fluxy</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/cadastro.css">
+</head>
+<body>
+
+    <main class="container-cadastro">
+        <div class="card-cadastro">
+
+            <h1>Cadastro de Empresas</h1>
+            <p>Cadastre uma empresa e organize seus setores no Fluxy.</p>
+
+            <form id="cadastroEmpresaForm">
+
+                <div class="mb-3">
+                    <label for="empresa" class="form-label">Nome da Empresa</label>
+                    <input
+                        type="text"
+                        id="empresa"
+                        name="empresa"
+                        class="form-control"
+                        placeholder="Digite o nome da sua empresa"
+                        required
+                    >
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Setores</label>
+
+                    <div id="listaSetores">
+
+                        <div class="setor-item mb-2">
+                            <input
+                                type="text"
+                                name="setor"
+                                class="form-control"
+                                placeholder="Digite o nome do setor"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="remover-setor btn btn-outline-danger mt-2"
+                            >
+                                Remover
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        id="adicionarSetor"
+                        class="btn btn-outline-secondary mt-2"
+                    >
+                        + Adicionar Setor
+                    </button>
+                </div>
+
+                <button type="submit" class="btn-cadastro">
+                    Cadastrar Empresa
+                </button>
+
+            </form>
+
+        </div>
+    </main>
+
+    <script src="/js/cadastro-empresa.js"></script>
+
+</body>
+</html>
+```
