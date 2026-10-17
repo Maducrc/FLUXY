@@ -22,6 +22,7 @@ CREATE TABLE usuarios (
     empresa_id INT NOT NULL,
     setor_id INT NOT NULL,
     sigla VARCHAR (10) NOT NULL,
+    perfil ENUM('super_admin', 'admin_empresa', 'funcionario') NOT NULL,
 
     FOREIGN KEY (empresa_id)
         REFERENCES empresas(id),
@@ -40,3 +41,12 @@ CREATE TABLE publicacoes (
 	FOREIGN KEY (usuario_id) 
 		REFERENCES usuarios(id)
 );
+
+INSERT INTO usuarios 
+(nome, usuario, senha, empresa_id, setor_id, sigla)
+VALUES
+('Administrador', 'admin', '$2b$10$J6erI0pqXU1oJodiW5rTy.lFRjeBW0jVsgHR5u/rmifJMiTMctnkC', 1, 1, 'ADM');
+
+INSERT INTO empresas (empresa) VALUES ('Empresa Teste');
+
+INSERT INTO setores (setor, empresa_id) VALUES ('TI', 1);
