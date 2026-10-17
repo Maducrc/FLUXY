@@ -118,10 +118,10 @@ app.post("/cadastro", async (req, res) =>{
     console.log("Setor:", setor);
     console.log("Empresa:", empresa);
 
-    if (!nome || !usuario || !senha || !sigla || !empresa || !setor || !perfil) {
+    if (!nome || !usuario || !senha || !sigla || !perfil) {
         return res.status(400).json({
-        sucesso: false,
-        mensagem: "Preencha todos os campos."
+            sucesso: false,
+            mensagem: "Preencha todos os campos."
         });
     }
 
@@ -136,28 +136,51 @@ app.post("/cadastro", async (req, res) =>{
 
     try {
 
-        const sqlValidarSetor = `
-            SELECT id
-            FROM setores
-            WHERE id = ? AND empresa_id = ?
-        `;
+        let empresaFinal = null;
+        let setorFinal = null;
 
-        const setoresValidos = await new Promise((resolve, reject) => {
-            db.query(
-                sqlValidarSetor,
-                [setor, empresa],
-                (erro, resultados) => {
-                    if (erro) return reject(erro);
-                    resolve(resultados);
-                }
-            );
-        });
+        if (perfil === "admin_empresa") {
+            if (!empresa) {
+                return res.status(400).json({ 
+                    sucesso: false, 
+                    mensagem: "Empresa é obrigatória para este perfil." 
+                });
+            }
+            empresaFinal = empresa;
+        } 
+        else if (perfil === "funcionario") {
+            if (!empresa || !setor) {
+                return res.status(400).json({ 
+                    sucesso: false, 
+                    mensagem: "Empresa e setor são obrigatórios para este perfil." 
+                });
+            }
 
-        if (setoresValidos.length === 0) {
-            return res.status(400).json({
-                sucesso: false,
-                mensagem: "O setor selecionado não pertence à empresa informada."
+            const sqlValidarSetor = `
+                SELECT id
+                FROM setores
+                WHERE id = ? AND empresa_id = ?
+            `;
+
+            const setoresValidos = await new Promise((resolve, reject) => {
+                db.query(
+                    sqlValidarSetor,
+                    [setor, empresa],
+                    (erro, resultados) => {
+                        if (erro) return reject(erro);
+                        resolve(resultados);
+                    }
+                );
             });
+
+            if (setoresValidos.length === 0) {
+                return res.status(400).json({
+                    sucesso: false,
+                    mensagem: "O setor selecionado não pertence à empresa informada."
+                });
+            }
+            empresaFinal = empresa;
+            setorFinal = setor;
         }
 
         //Criptografia Hash
@@ -171,7 +194,7 @@ app.post("/cadastro", async (req, res) =>{
 
         db.query(
             sql, 
-            [nome, usuario, senhaHash, empresa, setor, sigla, perfil],
+            [nome, usuario, senhaHash, empresaFinal, setorFinal, sigla, perfil],
             (erro, resultado) => {
 
                 if(erro) {
@@ -278,6 +301,7 @@ app.post("/login", async (req, res) => {
                 id: usuarioBanco.id,
                 nome: usuarioBanco.nome,
                 usuario: usuarioBanco.usuario,
+                sigla: usuarioBanco.sigla,  
                 empresa_id: usuarioBanco.empresa_id,
                 setor_id: usuarioBanco.setor_id,
                 perfil: usuarioBanco.perfil

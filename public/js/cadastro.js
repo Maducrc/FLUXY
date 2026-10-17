@@ -2,6 +2,28 @@ const formulario = document.getElementById("cadastroForm");
 const campoEmpresa = document.getElementById("empresa");
 const campoSetor = document.getElementById("setor");
 
+const perfilSelect = document.getElementById("perfil");
+    const divEmpresa = document.getElementById("div-empresa");
+    const divSetor = document.getElementById("div-setor");
+
+    perfilSelect.addEventListener("change", () => {
+        if (perfilSelect.value === "administrador") {
+            divEmpresa.style.display = "none";
+            divSetor.style.display = "none";
+            campoEmpresa.value = "";
+            campoSetor.value = "";
+        } 
+        else if (perfilSelect.value === "admin_empresa") {
+            divEmpresa.style.display = "block";
+            divSetor.style.display = "none";
+            campoSetor.value = "";
+        } 
+        else {
+            divEmpresa.style.display = "block";
+            divSetor.style.display = "block";
+        }
+    });
+
 campoEmpresa.addEventListener("change", async () => {
     const empresaId = campoEmpresa.value;
 
@@ -62,10 +84,20 @@ formulario.addEventListener("submit", async (event) => {
     const empresa = campoEmpresa.value;
     const setor = campoSetor.value;
     const sigla = document.getElementById("sigla").value.trim();
-    const perfil = document.getElementById("perfil").value;
+    const perfil = perfilSelect.value;
 
-    if (!empresa || !setor || !perfil) {
-        alert("Selecione uma empresa, um setor e um perfil.");
+    if (!perfil) {
+        alert("Selecione um perfil.");
+        return;
+    }
+
+    if (perfil === "funcionario" && (!empresa || !setor)) {
+        alert("Selecione uma empresa e um setor.");
+        return;
+    }
+
+    if (perfil === "admin_empresa" && !empresa) {
+        alert("Selecione uma empresa.");
         return;
     }
 
