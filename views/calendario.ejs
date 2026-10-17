@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/css/inicio.css">
+    <link rel="stylesheet" href="/css/variaveis.css">
+</head>
+<body>
+    <div class="layout">
+        
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="/img/logo.png" alt="Fluxy">
+            </div>
+
+            <nav class="menu">
+                <a href="/dashboard" class="menu-item">
+                    <i></i><span>Geral</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i></i><span>Acompanhamentos</span>
+                </a>
+                <div class="setor">
+                    <a href="#" class="menu-item">
+                        <i></i><span><%= usuario.setor %></span>
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i></i><span>Visão Geral do Setor</span>
+                    </a>
+                    <a href="/calendario" class="menu-item ativo">
+                        <i></i><span>Calendário</span>
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i></i><span>Pendências</span>
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i></i><span>Indicadores</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="menu-final">
+                <a href="#" class="menu-item"><i></i><span>Configurações</span></a>
+                <a href="/logout" class="menu-item"><i></i><span>Sair</span></a>
+            </div>
+        </aside>
+
+        <main class="conteudo" style="flex: 1; padding: 20px;">
+            <header>
+                <div>
+                    <h1>Calendário</h1>
+                    <p>Organize eventos e prazos</p>
+                </div>
+            </header>
+            <div id="calendario"></div>
+        </main>
+
+    </div>
+
+    <div class="modal fade" id="novoEvento" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Evento</h5>
+                    <button type="button" id="fecharModal">X</button>
+                </div>
+                <div class="modal-body">
+                    <form id="formEvento">
+                        <div class="titulo">
+                            <label>Título do Evento</label>
+                            <input type="text" id="eventoTitulo" required>
+                        </div>
+                        <div class="inicio">
+                            <label>Data e Hora de Início</label>
+                            <input type="datetime-local" id="eventoDataInicio" required>
+                        </div>
+                        <div class="fim">
+                            <label>Data e Hora de Fim</label>
+                            <input type="datetime-local" id="eventoDataFim" required>
+                        </div>
+                        <div class="descricao">
+                            <label>Descrição</label>
+                            <textarea id="eventoDescricao"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="botaoCancelar">Cancelar</button>
+                    <button type="button" id="botaoSalvarEvento">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    
+    <script src="/js/calendario.js"></script>
+</body>
+</html>

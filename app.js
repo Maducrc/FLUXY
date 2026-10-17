@@ -550,6 +550,69 @@ app.get("/admin", verificarAdm, (req, res) => {
 
 });
 
+app.get("/calendario", verificarLogin, (req, res) => {
+    const usuarioId = req.session.usuario.id;
+    const perfil = req.session.usuario.perfil;
+
+    const sqlUsuario = `
+        SELECT usuarios.*, empresas.empresa AS empresa, setores.setor AS setor
+        FROM usuarios
+        LEFT JOIN empresas ON usuarios.empresa_id = empresas.id
+        LEFT JOIN setores ON usuarios.setor_id = setores.id
+        WHERE usuarios.id = ?
+    `;
+
+    db.query(sqlUsuario, [usuarioId], (erro, resultados) => {
+        if (erro || resultados.length === 0) return res.redirect("/logout");
+        const dadosUsuario = resultados[0];
+
+        let sqlSetores = "SELECT id, setor FROM setores WHERE empresa_id = ?";
+        let paramsSetores = [dadosUsuario.empresa_id];
+
+        if (perfil === "funcionario") {
+            sqlSetores = "SELECT id, setor FROM setores WHERE id = ?";
+            paramsSetores = [dadosUsuario.setor_id];
+        }
+
+        db.query(sqlSetores, paramsSetores, (erroSetores, setores) => {
+            res.render("calendario", {
+                usuario: dadosUsuario,
+                setores: setores,
+                perfil: perfil
+            });
+        });
+    });
+});
+
+app.get("/eventos", verificarLogin, (req, res) => {
+    
+    const sql = "SELECT id, titulo AS title, REPLACE(data_inicio, ' ', 'T') AS start, REPLACE(data_fim, ' ', 'T') AS end, descricao AS description FROM eventos";
+    
+    db.query(sql, (erro, resultados) => {
+        if (erro) return res.status(500).json({ erro: "Erro ao buscar eventos" });
+        res.json(resultados);
+    });
+});
+
+app.post("/eventos", verificarLogin, (req, res) => {
+    const { titulo, data_inicio, data_fim, descricao } = req.body;
+    const usuarioId = req.session.usuario.id;
+
+    if (!titulo || !data_inicio || !data_fim) {
+        return res.status(400).json({ sucesso: false, mensagem: "Preencha o título e a data." });
+    }
+
+    const sql = "INSERT INTO eventos (usuario_id, titulo, data_inicio, data_fim, descricao) VALUES (?, ?, ?, ?, ?)";
+    
+    db.query(sql, [usuarioId, titulo, data_inicio, data_fim, descricao], (erro) => {
+        if (erro) {
+            console.error("Erro ao salvar evento:", erro);
+            return res.status(500).json({ sucesso: false, mensagem: "Erro ao salvar evento." });
+        }
+        res.json({ sucesso: true });
+    });
+});
+
 app.get("/logout", (req, res) => {
     req.session.destroy(() => {
         res.redirect("/");

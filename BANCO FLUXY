@@ -42,13 +42,23 @@ CREATE TABLE publicacoes (
 		REFERENCES usuarios(id)
 );
 
+CREATE TABLE eventos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    titulo VARCHAR(100) NOT NULL,
+    data_inicio DATETIME NOT NULL,
+    data_fim DATETIME NOT NULL,
+    descricao TEXT,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+);
+
+INSERT INTO empresas (empresa) VALUES ('Empresa Teste');
+
+INSERT INTO setores (setor, empresa_id) VALUES ('TI', 1);
+
 // senha do usuario teste = "suaSenhaForte"
 
 INSERT INTO usuarios 
 (nome, usuario, senha, empresa_id, setor_id, sigla, perfil)
 VALUES
 ('Administrador', 'admin', '$2b$10$J6erI0pqXU1oJodiW5rTy.lFRjeBW0jVsgHR5u/rmifJMiTMctnkC', 1, 1, 'ADM', 'administrador');
-
-INSERT INTO empresas (empresa) VALUES ('Empresa Teste');
-
-INSERT INTO setores (setor, empresa_id) VALUES ('TI', 1);
