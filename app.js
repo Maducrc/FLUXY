@@ -106,7 +106,8 @@ app.post("/cadastro", async (req, res) =>{
         senha, 
         empresa, 
         setor,
-        sigla
+        sigla,
+        perfil
     } = req.body;
 
     console.log("DADOS RECEBIDOS NO CADASTRO:");
@@ -114,8 +115,24 @@ app.post("/cadastro", async (req, res) =>{
     console.log("Usuário:", usuario);
     console.log("Senha:", senha);
     console.log("Sigla:", sigla);
-    console.log("Empresa:", empresa);
     console.log("Setor:", setor);
+    console.log("Empresa:", empresa);
+
+    if (!nome || !usuario || !senha || !sigla || !empresa || !setor || !perfil) {
+        return res.status(400).json({
+        sucesso: false,
+        mensagem: "Preencha todos os campos."
+        });
+    }
+
+    const perfisValidos = ["administrador", "admin_empresa", "funcionario"];
+
+    if (!perfisValidos.includes(perfil)) {
+        return res.status(400).json({
+        sucesso: false,
+        mensagem: "Perfil inválido."
+        });
+    }
 
     try {
 
@@ -148,13 +165,13 @@ app.post("/cadastro", async (req, res) =>{
 
         const sql = `
             INSERT INTO usuarios 
-            (nome, usuario, senha, empresa_id, setor_id, sigla)
-            VALUES (?, ?, ?, ?, ?, ?)
+            (nome, usuario, senha, empresa_id, setor_id, sigla, perfil)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
 
         db.query(
             sql, 
-            [nome, usuario, senhaHash, empresa, setor, sigla],
+            [nome, usuario, senhaHash, empresa, setor, sigla, perfil],
             (erro, resultado) => {
 
                 if(erro) {

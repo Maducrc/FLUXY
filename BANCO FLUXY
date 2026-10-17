@@ -22,7 +22,7 @@ CREATE TABLE usuarios (
     empresa_id INT NOT NULL,
     setor_id INT NOT NULL,
     sigla VARCHAR (10) NOT NULL,
-    perfil ENUM('super_admin', 'admin_empresa', 'funcionario') NOT NULL,
+    perfil ENUM('administrador', 'admin_empresa', 'funcionario') NOT NULL,
 
     FOREIGN KEY (empresa_id)
         REFERENCES empresas(id),
@@ -42,10 +42,12 @@ CREATE TABLE publicacoes (
 		REFERENCES usuarios(id)
 );
 
+// senha do usuario teste = "suaSenhaForte"
+
 INSERT INTO usuarios 
 (nome, usuario, senha, empresa_id, setor_id, sigla, perfil)
 VALUES
-('Administrador', 'admin', '$2b$10$J6erI0pqXU1oJodiW5rTy.lFRjeBW0jVsgHR5u/rmifJMiTMctnkC', 1, 1, 'ADM', 'super-admin');
+('Administrador', 'admin', '$2b$10$J6erI0pqXU1oJodiW5rTy.lFRjeBW0jVsgHR5u/rmifJMiTMctnkC', 1, 1, 'ADM', 'administrador');
 
 INSERT INTO empresas (empresa) VALUES ('Empresa Teste');
 

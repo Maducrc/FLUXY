@@ -62,9 +62,10 @@ formulario.addEventListener("submit", async (event) => {
     const empresa = campoEmpresa.value;
     const setor = campoSetor.value;
     const sigla = document.getElementById("sigla").value.trim();
+    const perfil = document.getElementById("perfil").value;
 
-    if (!empresa || !setor) {
-        alert("Selecione uma empresa e um setor.");
+    if (!empresa || !setor || !perfil) {
+        alert("Selecione uma empresa, um setor e um perfil.");
         return;
     }
 
@@ -80,7 +81,8 @@ formulario.addEventListener("submit", async (event) => {
                 senha,
                 sigla,
                 empresa,
-                setor
+                setor,
+                perfil
             })
         });
 
@@ -98,6 +100,7 @@ formulario.addEventListener("submit", async (event) => {
             `Empresa: ${campoEmpresa.selectedOptions[0].text}\n` +
             `Setor: ${campoSetor.selectedOptions[0].text}\n` +
             `Sigla: ${sigla}\n\n` +
+            `Perfil: ${document.getElementById("perfil").selectedOptions[0].text}\n\n` +
             `Confirma as informações e deseja voltar ao painel administrativo?`
         );
 
