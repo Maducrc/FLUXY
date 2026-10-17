@@ -43,9 +43,9 @@ CREATE TABLE publicacoes (
 );
 
 INSERT INTO usuarios 
-(nome, usuario, senha, empresa_id, setor_id, sigla)
+(nome, usuario, senha, empresa_id, setor_id, sigla, perfil)
 VALUES
-('Administrador', 'admin', '$2b$10$J6erI0pqXU1oJodiW5rTy.lFRjeBW0jVsgHR5u/rmifJMiTMctnkC', 1, 1, 'ADM');
+('Administrador', 'admin', '$2b$10$J6erI0pqXU1oJodiW5rTy.lFRjeBW0jVsgHR5u/rmifJMiTMctnkC', 1, 1, 'ADM', 'super-admin');
 
 INSERT INTO empresas (empresa) VALUES ('Empresa Teste');
 
