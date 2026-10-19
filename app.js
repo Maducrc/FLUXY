@@ -106,7 +106,8 @@ app.post("/cadastro", async (req, res) =>{
         senha, 
         empresa, 
         setor,
-        sigla
+        sigla,
+        perfil
     } = req.body;
 
     console.log("DADOS RECEBIDOS NO CADASTRO:");
@@ -114,33 +115,72 @@ app.post("/cadastro", async (req, res) =>{
     console.log("Usuário:", usuario);
     console.log("Senha:", senha);
     console.log("Sigla:", sigla);
-    console.log("Empresa:", empresa);
     console.log("Setor:", setor);
+    console.log("Empresa:", empresa);
+
+    if (!nome || !usuario || !senha || !sigla || !perfil) {
+        return res.status(400).json({
+            sucesso: false,
+            mensagem: "Preencha todos os campos."
+        });
+    }
+
+    const perfisValidos = ["administrador", "admin_empresa", "funcionario"];
+
+    if (!perfisValidos.includes(perfil)) {
+        return res.status(400).json({
+        sucesso: false,
+        mensagem: "Perfil inválido."
+        });
+    }
 
     try {
 
-        const sqlValidarSetor = `
-            SELECT id
-            FROM setores
-            WHERE id = ? AND empresa_id = ?
-        `;
+        let empresaFinal = null;
+        let setorFinal = null;
 
-        const setoresValidos = await new Promise((resolve, reject) => {
-            db.query(
-                sqlValidarSetor,
-                [setor, empresa],
-                (erro, resultados) => {
-                    if (erro) return reject(erro);
-                    resolve(resultados);
-                }
-            );
-        });
+        if (perfil === "admin_empresa") {
+            if (!empresa) {
+                return res.status(400).json({ 
+                    sucesso: false, 
+                    mensagem: "Empresa é obrigatória para este perfil." 
+                });
+            }
+            empresaFinal = empresa;
+        } 
+        else if (perfil === "funcionario") {
+            if (!empresa || !setor) {
+                return res.status(400).json({ 
+                    sucesso: false, 
+                    mensagem: "Empresa e setor são obrigatórios para este perfil." 
+                });
+            }
 
-        if (setoresValidos.length === 0) {
-            return res.status(400).json({
-                sucesso: false,
-                mensagem: "O setor selecionado não pertence à empresa informada."
+            const sqlValidarSetor = `
+                SELECT id
+                FROM setores
+                WHERE id = ? AND empresa_id = ?
+            `;
+
+            const setoresValidos = await new Promise((resolve, reject) => {
+                db.query(
+                    sqlValidarSetor,
+                    [setor, empresa],
+                    (erro, resultados) => {
+                        if (erro) return reject(erro);
+                        resolve(resultados);
+                    }
+                );
             });
+
+            if (setoresValidos.length === 0) {
+                return res.status(400).json({
+                    sucesso: false,
+                    mensagem: "O setor selecionado não pertence à empresa informada."
+                });
+            }
+            empresaFinal = empresa;
+            setorFinal = setor;
         }
 
         //Criptografia Hash
@@ -148,13 +188,13 @@ app.post("/cadastro", async (req, res) =>{
 
         const sql = `
             INSERT INTO usuarios 
-            (nome, usuario, senha, empresa_id, setor_id, sigla)
-            VALUES (?, ?, ?, ?, ?, ?)
+            (nome, usuario, senha, empresa_id, setor_id, sigla, perfil)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
 
         db.query(
             sql, 
-            [nome, usuario, senhaHash, empresa, setor, sigla],
+            [nome, usuario, senhaHash, empresaFinal, setorFinal, sigla, perfil],
             (erro, resultado) => {
 
                 if(erro) {
@@ -261,6 +301,7 @@ app.post("/login", async (req, res) => {
                 id: usuarioBanco.id,
                 nome: usuarioBanco.nome,
                 usuario: usuarioBanco.usuario,
+                sigla: usuarioBanco.sigla,  
                 empresa_id: usuarioBanco.empresa_id,
                 setor_id: usuarioBanco.setor_id,
                 perfil: usuarioBanco.perfil
@@ -509,3 +550,71 @@ app.get("/admin", verificarAdm, (req, res) => {
 
 });
 
+app.get("/calendario", verificarLogin, (req, res) => {
+    const usuarioId = req.session.usuario.id;
+    const perfil = req.session.usuario.perfil;
+
+    const sqlUsuario = `
+        SELECT usuarios.*, empresas.empresa AS empresa, setores.setor AS setor
+        FROM usuarios
+        LEFT JOIN empresas ON usuarios.empresa_id = empresas.id
+        LEFT JOIN setores ON usuarios.setor_id = setores.id
+        WHERE usuarios.id = ?
+    `;
+
+    db.query(sqlUsuario, [usuarioId], (erro, resultados) => {
+        if (erro || resultados.length === 0) return res.redirect("/logout");
+        const dadosUsuario = resultados[0];
+
+        let sqlSetores = "SELECT id, setor FROM setores WHERE empresa_id = ?";
+        let paramsSetores = [dadosUsuario.empresa_id];
+
+        if (perfil === "funcionario") {
+            sqlSetores = "SELECT id, setor FROM setores WHERE id = ?";
+            paramsSetores = [dadosUsuario.setor_id];
+        }
+
+        db.query(sqlSetores, paramsSetores, (erroSetores, setores) => {
+            res.render("calendario", {
+                usuario: dadosUsuario,
+                setores: setores,
+                perfil: perfil
+            });
+        });
+    });
+});
+
+app.get("/eventos", verificarLogin, (req, res) => {
+    
+    const sql = "SELECT id, titulo AS title, REPLACE(data_inicio, ' ', 'T') AS start, REPLACE(data_fim, ' ', 'T') AS end, descricao AS description FROM eventos";
+    
+    db.query(sql, (erro, resultados) => {
+        if (erro) return res.status(500).json({ erro: "Erro ao buscar eventos" });
+        res.json(resultados);
+    });
+});
+
+app.post("/eventos", verificarLogin, (req, res) => {
+    const { titulo, data_inicio, data_fim, descricao } = req.body;
+    const usuarioId = req.session.usuario.id;
+
+    if (!titulo || !data_inicio || !data_fim) {
+        return res.status(400).json({ sucesso: false, mensagem: "Preencha o título e a data." });
+    }
+
+    const sql = "INSERT INTO eventos (usuario_id, titulo, data_inicio, data_fim, descricao) VALUES (?, ?, ?, ?, ?)";
+    
+    db.query(sql, [usuarioId, titulo, data_inicio, data_fim, descricao], (erro) => {
+        if (erro) {
+            console.error("Erro ao salvar evento:", erro);
+            return res.status(500).json({ sucesso: false, mensagem: "Erro ao salvar evento." });
+        }
+        res.json({ sucesso: true });
+    });
+});
+
+app.get("/logout", (req, res) => {
+    req.session.destroy(() => {
+        res.redirect("/");
+    });
+});

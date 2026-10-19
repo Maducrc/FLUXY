@@ -12,19 +12,27 @@
 
     <input type="text" id="sigla" placeholder="Sigla" required>
 
-    <select id="empresa" name="empresa" class="form-select">
-    
-        <option value="">Selecione uma empresa: </option>
-
-        <% empresas.forEach(empresa => { %>
-        <option value="<%= empresa.id %>"><%= empresa.empresa %></option>
-        <% }); %>
-
+    <select id="perfil" name="perfil" class="form-select" required>
+        <option value="">Selecione o perfil</option>
+        <option value="administrador">Administrador</option>
+        <option value="admin_empresa">Admin da Empresa</option>
+        <option value="funcionario">Funcionário</option>
     </select>
 
-    <select id="setor" name="setor" class="form-select" required disabled>
-        <option value="">Selecione primeiro uma empresa</option>
-    </select>
+    <div id="div-empresa">
+        <select id="empresa" name="empresa" class="form-select">
+            <option value="">Selecione uma empresa: </option>
+            <% empresas.forEach(empresa => { %>
+            <option value="<%= empresa.id %>"><%= empresa.empresa %></option>
+            <% }); %>
+        </select>
+    </div>
+
+    <div id="div-setor">
+        <select id="setor" name="setor" class="form-select" disabled>
+            <option value="">Selecione primeiro uma empresa</option>
+        </select>
+    </div>
 
     <button type="submit">
         Cadastrar

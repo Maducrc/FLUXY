@@ -19,9 +19,10 @@ CREATE TABLE usuarios (
     nome VARCHAR(100) NOT NULL,
     usuario VARCHAR(50) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
-    empresa_id INT NOT NULL,
-    setor_id INT NOT NULL,
+    empresa_id INT,
+    setor_id INT,
     sigla VARCHAR (10) NOT NULL,
+    perfil ENUM('administrador', 'admin_empresa', 'funcionario') NOT NULL,
 
     FOREIGN KEY (empresa_id)
         REFERENCES empresas(id),
@@ -40,3 +41,24 @@ CREATE TABLE publicacoes (
 	FOREIGN KEY (usuario_id) 
 		REFERENCES usuarios(id)
 );
+
+CREATE TABLE eventos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    titulo VARCHAR(100) NOT NULL,
+    data_inicio DATETIME NOT NULL,
+    data_fim DATETIME NOT NULL,
+    descricao TEXT,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+);
+
+INSERT INTO empresas (empresa) VALUES ('Empresa Teste');
+
+INSERT INTO setores (setor, empresa_id) VALUES ('TI', 1);
+
+// senha do usuario teste = "suaSenhaForte"
+
+INSERT INTO usuarios 
+(nome, usuario, senha, empresa_id, setor_id, sigla, perfil)
+VALUES
+('Administrador', 'admin', '$2b$10$J6erI0pqXU1oJodiW5rTy.lFRjeBW0jVsgHR5u/rmifJMiTMctnkC', 1, 1, 'ADM', 'administrador');

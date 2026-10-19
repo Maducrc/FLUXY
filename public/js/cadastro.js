@@ -2,6 +2,39 @@ const formulario = document.getElementById("cadastroForm");
 const campoEmpresa = document.getElementById("empresa");
 const campoSetor = document.getElementById("setor");
 
+const perfilSelecionado = document.getElementById("perfil");
+const divEmpresa = document.getElementById("div-empresa");
+const divSetor = document.getElementById("div-setor");
+
+perfilSelecionado.addEventListener("change", () => {
+    if (perfilSelecionado.value === "administrador") {
+        divEmpresa.style.display = "none";
+        divSetor.style.display = "none";
+        
+        campoEmpresa.disabled = true;
+        campoSetor.disabled = true;
+        
+        campoEmpresa.value = "";
+        campoSetor.value = "";
+    } 
+    else if (perfilSelecionado.value === "admin_empresa") {
+        divEmpresa.style.display = "block";
+        divSetor.style.display = "none";
+        
+        campoEmpresa.disabled = false;
+        campoSetor.disabled = true;
+        
+        campoSetor.value = "";
+    } 
+    else {
+        divEmpresa.style.display = "block";
+        divSetor.style.display = "block";
+        
+        campoEmpresa.disabled = false;
+        campoSetor.disabled = false;
+    }
+});
+
 campoEmpresa.addEventListener("change", async () => {
     const empresaId = campoEmpresa.value;
 
@@ -44,7 +77,9 @@ campoEmpresa.addEventListener("change", async () => {
             campoSetor.add(new Option(setor.setor, setor.id));
         });
 
-        campoSetor.disabled = false;
+        if (perfilSelecionado.value === "funcionario") {
+            campoSetor.disabled = false;
+        }
 
     } catch (erro) {
         console.error("Erro ao buscar setores:", erro);
@@ -62,9 +97,20 @@ formulario.addEventListener("submit", async (event) => {
     const empresa = campoEmpresa.value;
     const setor = campoSetor.value;
     const sigla = document.getElementById("sigla").value.trim();
+    const perfil = perfilSelecionado.value;
 
-    if (!empresa || !setor) {
+    if (!perfil) {
+        alert("Selecione um perfil.");
+        return;
+    }
+
+    if (perfil === "funcionario" && (!empresa || !setor)) {
         alert("Selecione uma empresa e um setor.");
+        return;
+    }
+
+    if (perfil === "admin_empresa" && !empresa) {
+        alert("Selecione uma empresa.");
         return;
     }
 
@@ -80,7 +126,8 @@ formulario.addEventListener("submit", async (event) => {
                 senha,
                 sigla,
                 empresa,
-                setor
+                setor,
+                perfil
             })
         });
 
@@ -98,6 +145,7 @@ formulario.addEventListener("submit", async (event) => {
             `Empresa: ${campoEmpresa.selectedOptions[0].text}\n` +
             `Setor: ${campoSetor.selectedOptions[0].text}\n` +
             `Sigla: ${sigla}\n\n` +
+            `Perfil: ${perfilSelecionado.selectedOptions[0].text}\n\n` +
             `Confirma as informações e deseja voltar ao painel administrativo?`
         );
 

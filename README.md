@@ -21,5 +21,5 @@ A plataforma busca fortalecer a colaboração entre equipes por meio de recursos
 ## Equipe
 
 * **Emilly Vitória da Silva**
-* **Julia Matos Nogueira**
+* **Julia Matos de Lima Nogueira**
 * **Maria Eduarda Chella Ramos Carvalhal**
