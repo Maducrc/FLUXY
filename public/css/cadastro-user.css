@@ -1,0 +1,32 @@
+@import url("variaveis.css");
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --fluxy-primary: #00CED1;
+    --fluxy-secondary: #67E8F9;
+    --fluxy-hoover: #b9f7ff;
+    --fluxy-dark: #191B1F;
+    --fluxy-light: #000;
+    --fluxy-muted: #94A3B8;
+    --fluxy-border: #E2E8F0;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color:  var(--fluxy-light);
+    color: #F8FAFC;
+}
+
+.container-cadastro {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    background-color: var(--fluxy-light);
+}
