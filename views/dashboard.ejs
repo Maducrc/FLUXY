@@ -34,12 +34,13 @@
 
                     <a href="#" class="menu-item">
                         <i></i>
-                        <span><%= usuario.setor %></span>
-                    </a>
-
-                     <a href="#" class="menu-item">
-                        <i></i>
-                        <span>Visão Geral do Setor</span>
+                        <span>
+                            <% if (usuario.perfil === 'admin_empresa') { %>
+                                <%= usuario.empresa %>
+                            <% } else { %>
+                                <%= usuario.setor %>
+                            <% } %>
+                        </span>
                     </a>
 
                     <a href="/calendario" class="menu-item">
@@ -95,7 +96,13 @@
 
                     <div>
                         <strong> <%= usuario.nome %></strong>
-                        <small> <%= usuario.setor%></small>
+                        <small> 
+                            <% if (usuario.perfil === 'admin_empresa') { %>
+                                <%= usuario.empresa %>
+                            <% } else { %>
+                                <%= usuario.setor %>
+                            <% } %>
+                        </small>
                     </div>
 
                 </div>

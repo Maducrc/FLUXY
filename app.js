@@ -337,6 +337,7 @@ app.get("/dashboard", verificarLogin, (req, res) => {
         usuarios.nome,
         usuarios.usuario,
         usuarios.sigla,
+        usuarios.perfil,
         empresas.empresa AS empresa,
         setores.setor AS setor
     FROM usuarios
