@@ -49,6 +49,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const data_fim = document.getElementById('eventoDataFim').value;
         const descricao = document.getElementById('eventoDescricao').value;
 
+        const checkboxesMarcados = document.querySelectorAll('.setor-checkbox:checked');
+    
+        const setoresSelecionados = Array.from(checkboxesMarcados).map(checkbox => checkbox.value);
+
         if (!titulo || !data_inicio) {
             alert("Preencha o título e a data.");
             return;
@@ -58,7 +62,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const resposta = await fetch('/eventos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ titulo, data_inicio, data_fim, descricao })
+                body: JSON.stringify({ 
+                    titulo, 
+                    data_inicio, 
+                    data_fim, 
+                    descricao, 
+                    setores: setoresSelecionados 
+                })
             });
 
             const dados = await resposta.json();
@@ -66,6 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (dados.sucesso) {
                 modal.hide();
                 calendarioVizu.refetchEvents(); 
+                document.querySelectorAll('.setor-checkbox').forEach(cb => cb.checked = false);
             } else {
                 alert(dados.mensagem);
             }

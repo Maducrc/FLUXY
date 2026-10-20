@@ -23,10 +23,12 @@
 
             <nav class="menu">
                 <a href="/dashboard" class="menu-item">
-                    <i></i><span>Geral</span>
+                    <i></i>
+                    <span>Geral</span>
                 </a>
                 <a href="#" class="menu-item">
-                    <i></i><span>Acompanhamentos</span>
+                    <i></i>
+                    <span>Acompanhamentos</span>
                 </a>
                 <div class="setor">
                     <a href="#" class="menu-item">
@@ -40,23 +42,33 @@
                         </span>
                     </a>
                     <a href="#" class="menu-item">
-                        <i></i><span>Visão Geral do Setor</span>
+                        <i></i>
+                        <span>Visão Geral do Setor</span>
                     </a>
                     <a href="/calendario" class="menu-item ativo">
-                        <i></i><span>Calendário</span>
+                        <i></i>
+                        <span>Calendário</span>
                     </a>
                     <a href="#" class="menu-item">
-                        <i></i><span>Pendências</span>
+                        <i></i>
+                        <span>Pendências</span>
                     </a>
                     <a href="#" class="menu-item">
-                        <i></i><span>Indicadores</span>
+                        <i></i>
+                        <span>Indicadores</span>
                     </a>
                 </div>
             </nav>
 
             <div class="menu-final">
-                <a href="#" class="menu-item"><i></i><span>Configurações</span></a>
-                <a href="/logout" class="menu-item"><i></i><span>Sair</span></a>
+                <a href="#" class="menu-item">
+                    <i></i>
+                    <span>Configurações</span>
+                </a>
+                <a href="/logout" class="menu-item">
+                    <i></i>
+                    <span>Sair</span>
+                </a>
             </div>
         </aside>
 
@@ -86,16 +98,31 @@
                             <input type="text" id="eventoTitulo" required>
                         </div>
                         <div class="inicio">
-                            <label>Data e Hora de Início</label>
-                            <input type="datetime-local" id="eventoDataInicio" required>
+                                <label>Data e Hora de Início</label>
+                                <input type="datetime-local" id="eventoDataInicio" required>
                         </div>
                         <div class="fim">
-                            <label>Data e Hora de Fim</label>
-                            <input type="datetime-local" id="eventoDataFim" required>
-                        </div>
-                        <div class="descricao">
-                            <label>Descrição</label>
-                            <textarea id="eventoDescricao"></textarea>
+                                <label>Data e Hora de Fim</label>
+                                <input type="datetime-local" id="eventoDataFim" required>
+                            </div>
+                            <div class="descricao">
+                                <label>Descrição</label>
+                                <textarea id="eventoDescricao"></textarea>
+                            </div>
+                            <div class="setores-evento mt-3">
+                                <label class="mb-2"><b>Visível para quais setores?</b></label>
+                                
+                                <div class="d-flex flex-column gap-2" style="max-height: 150px; overflow-y: auto;">
+                                    <% setores.forEach(function(setor) { %>
+                                        <div class="form-check">
+                                            <input class="form-check-input setor-checkbox" type="checkbox" value="<%= setor.id %>" id="setor_<%= setor.id %>">
+                                            <label class="form-check-label" for="setor_<%= setor.id %>">
+                                                <%= setor.setor %>
+                                            </label>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                                <small>Deixe todos desmarcados para evento geral.</small>
                         </div>
                     </form>
                 </div>
