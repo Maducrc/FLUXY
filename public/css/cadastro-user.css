@@ -1,5 +1,7 @@
+
 @import url("variaveis.css");
 
+/* Estrutura da página */
 * {
     box-sizing: border-box;
 }
@@ -19,7 +21,7 @@ body {
     min-height: 100vh;
     font-family: Arial, Helvetica, sans-serif;
     background-color:  var(--fluxy-light);
-    color: #F8FAFC;
+    color: var(--fluxy-dark);
 }
 
 .container-cadastro {
@@ -29,4 +31,135 @@ body {
     align-items: center;
     padding: 40px 20px;
     background-color: var(--fluxy-light);
+}
+
+/* Card principal */
+.card-cadastro {
+    width: 100%;
+    max-width: 560px;
+    padding: 40px;
+    background-color: #d2ffff;
+    color: #0F172A;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px var(--flu);
+}
+
+/* Cabeçalho */
+.card-cadastro h1 {
+    margin: 0 0 6px;
+    color: var(--turquesa);
+    font-size: 30px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.card-cadastro > p {
+    margin: 0 0 46px;
+    color: #64748B;
+    font-size: 15px;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* Campos */
+.campo-cadastro {
+    margin-bottom: 28px;
+}
+
+.campo-cadastro label {
+    display: block;
+    margin-bottom: 14px;
+    color: #00BFC4;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.campo-cadastro input,
+.campo-cadastro select {
+    display: block;
+    width: 100%;
+    padding: 14px 18px;
+    border: 1px solid #D9F0F2;
+    border-radius: 12px;
+    background-color: #FFF;
+    color: #0F172A;
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.campo-cadastro input::placeholder {
+    color: #94A3B8;
+}
+
+.campo-cadastro input:focus,
+.campo-cadastro select:focus {
+    border-color: #00CED1;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 206, 209, .2);
+}
+
+.campo-cadastro select:disabled {
+    background-color: #EAF7F7;
+    color: #94A3B8;
+    cursor: not-allowed;
+}
+
+/* Botão principal */
+.btn-cadastro {
+   display: block;
+    width: 100%;
+    min-height: 50px;
+    margin-top: 12px;
+    padding: 13px 18px;
+    color: #0F172A;
+    background-color: #AFEEEE;
+    border: 1px solid #AFEEEE;
+    border-radius: 9px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease,
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+.btn-cadastro:hover {
+    background-color: #8DE1E4;
+}
+
+.btn-cadastro:active {
+    transform: scale(.99);
+}
+
+.btn-cadastro:focus-visible {
+    outline: 3px solid #00BFC4;
+    outline-offset: 3px;
+}
+
+/* Telas menores */
+@media (max-width: 600px) {
+    .container-cadastro {
+        padding: 20px 14px;
+    }
+
+    .card-cadastro {
+        padding: 30px 22px;
+        border-radius: 18px;
+    }
+
+    .card-cadastro h1 {
+        font-size: 28px;
+    }
+
+    .card-cadastro > p {
+        margin-bottom: 32px;
+        font-size: 16px;
+    }
+
+    .campo-cadastro input,
+    .campo-cadastro select {
+        min-height: 52px;
+        font-size: 15px;
+    }
 }

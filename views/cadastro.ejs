@@ -1,43 +1,73 @@
+
 <link rel="stylesheet" href="/css/cadastro-user.css">
 
-<div class="container-cadastro"></div>
+<main class="container-cadastro">
+    <div class="card-cadastro">
 
-<form id="cadastroForm">
+        <h1>Cadastro de Usuários</h1>
+        <p>Cadastre usuários e organize o acesso ao Fluxy.</p>
 
-    <input type="text" id="nome" placeholder="Nome" required>
+        <form id="cadastroForm">
 
-    <input type="text" id="usuario" placeholder="Usuário" required>
+            <div class="campo-cadastro">
+                <label for="nome">Nome completo</label>
+                <input type="text" id="nome" name="nome"
+                       placeholder="Digite o nome completo" required>
+            </div>
 
-    <input type="password" id="senha" placeholder="Senha" required>
+            <div class="campo-cadastro">
+                <label for="usuario">Usuário</label>
+                <input type="text" id="usuario" name="usuario"
+                       placeholder="Digite o nome de usuário" required>
+            </div>
 
-    <input type="text" id="sigla" placeholder="Sigla" required>
+            <div class="campo-cadastro">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" name="senha"
+                       placeholder="Crie uma senha" required>
+            </div>
 
-    <select id="perfil" name="perfil" class="form-select" required>
-        <option value="">Selecione o perfil</option>
-        <option value="administrador">Administrador</option>
-        <option value="admin_empresa">Admin da Empresa</option>
-        <option value="funcionario">Funcionário</option>
-    </select>
+            <div class="campo-cadastro">
+                <label for="sigla">Sigla</label>
+                <input type="text" id="sigla" name="sigla"
+                       placeholder="Ex.: MDS" maxlength="10" required>
+            </div>
 
-    <div id="div-empresa">
-        <select id="empresa" name="empresa" class="form-select">
-            <option value="">Selecione uma empresa: </option>
-            <% empresas.forEach(empresa => { %>
-            <option value="<%= empresa.id %>"><%= empresa.empresa %></option>
-            <% }); %>
-        </select>
+            <div class="campo-cadastro">
+                <label for="perfil">Perfil de acesso</label>
+                <select id="perfil" name="perfil" required>
+                    <option value="">Selecione o perfil</option>
+                    <option value="administrador">Administrador</option>
+                    <option value="admin_empresa">Admin da Empresa</option>
+                    <option value="funcionario">Funcionário</option>
+                </select>
+            </div>
+
+            <div id="div-empresa" class="campo-cadastro">
+                <label for="empresa">Empresa</label>
+                <select id="empresa" name="empresa">
+                    <option value="">Selecione uma empresa</option>
+                    <% empresas.forEach(empresa => { %>
+                        <option value="<%= empresa.id %>">
+                            <%= empresa.empresa %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+
+            <div id="div-setor" class="campo-cadastro">
+                <label for="setor">Setor</label>
+                <select id="setor" name="setor" disabled>
+                    <option value="">Selecione primeiro uma empresa</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-cadastro">
+                Cadastrar Usuário
+            </button>
+
+        </form>
     </div>
-
-    <div id="div-setor">
-        <select id="setor" name="setor" class="form-select" disabled>
-            <option value="">Selecione primeiro uma empresa</option>
-        </select>
-    </div>
-
-    <button type="submit">
-        Cadastrar
-    </button>
-
-</form>
+</main>
 
 <script src="/js/cadastro.js"></script>
