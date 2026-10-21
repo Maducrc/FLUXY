@@ -72,7 +72,23 @@
         </div>
     </main>
 
-    <script src="/js/cadastro-empresa.js"></script>
+    <div class="modal-fluxy-overlay" id="modalFluxy" hidden>
+        <section class="modal-fluxy" role="dialog" aria-modal="true" aria-labelledby="modalFluxyTitulo" aria-describedby="modalFluxyMensagem">
+            <div class="modal-fluxy-icone" id="modalFluxyIcone">
+                <i class="bi bi-check-circle"></i>
+            </div>
+
+            <h2 id="modalFluxyTitulo">Tudo certo!</h2>
+            <p id="modalFluxyMensagem">A ação foi concluída com sucesso.</p>
+
+            <div class="modal-fluxy-acoes">
+                <button type="button" id="modalFluxyCancelar" class="modal-fluxy-cancelar" hidden>Cancelar</button>
+                <button type="button" id="modalFluxyConfirmar" class="modal-fluxy-confirmar">Ok</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="/js/logout.js"></script>
 
 </body>
 </html>

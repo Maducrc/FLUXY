@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <link rel="stylesheet" href="/css/inicio.css">
+    <link rel="stylesheet" href="/css/modal.css">
 
 <body>
 
@@ -62,7 +63,7 @@
                         <span>Configurações</span>
                 </a>
 
-                 <a href="/logout" class="menu-item">
+                 <a href="/logout" class="menu-item" id="btnLogout">
                         <i class="bi bi-box-arrow-right"></i>
                         <span>Sair</span>
                 </a>
@@ -172,7 +173,9 @@
             </section>
 
         </main>
+        <!-- Fim conteúdo Principal-->
 
+        <!-- Início Lateral-->
         <aside class="laretal">
 
             <section class="card-lateral">
@@ -188,9 +191,27 @@
             </section>
 
         </aside>
+        <!-- Fim Lateral -->
 
     </div>
 
+    <div class="modal-fluxy-overlay" id="modalFluxy" hidden>
+        <section class="modal-fluxy" role="dialog" aria-modal="true" aria-labelledby="modalFluxyTitulo" aria-describedby="modalFluxyMensagem">
+            <div class="modal-fluxy-icone" id="modalFluxyIcone">
+                <i class="bi bi-check-circle"></i>
+            </div>
+
+            <h2 id="modalFluxyTitulo">Tudo certo!</h2>
+            <p id="modalFluxyMensagem">A ação foi concluída com sucesso.</p>
+
+            <div class="modal-fluxy-acoes">
+                <button type="button" id="modalFluxyCancelar" class="modal-fluxy-cancelar" hidden>Cancelar</button>
+                <button type="button" id="modalFluxyConfirmar" class="modal-fluxy-confirmar">Ok</button>
+            </div>
+        </section>
+    </div>
+
     <script src="/js/inicio.js"></script>
+    <script src="/js/logout.js"></script>
 
 </body>

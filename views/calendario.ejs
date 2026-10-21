@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="/css/inicio.css">
     <link rel="stylesheet" href="/css/variaveis.css">
     <link rel="stylesheet" href="/css/calendario.css">
+    <link rel="stylesheet" href="/css/modal.css">
+
 </head>
 <body>
     <div class="layout">
@@ -24,7 +26,6 @@
             </div>
 
             <nav class="menu">
-
                 <a href="/dashboard" class="menu-item">
                     <i class="bi bi-house-door"></i>
                     <span>Geral</span>
@@ -58,21 +59,18 @@
                     </a>
 
                 </div>
-
             </nav>
 
             <div class="menu-final">
-
                  <a href="#" class="menu-item">
                         <i class="bi bi-gear"></i>
                         <span>Configurações</span>
                 </a>
 
-                 <a href="/logout" class="menu-item">
+                 <a href="/logout" class="menu-item" id="btnLogout">
                         <i class="bi bi-box-arrow-right"></i>
                         <span>Sair</span>
                 </a>
-
             </div>
 
         </aside>
@@ -141,9 +139,27 @@
         </div>
     </div>
 
+    <div class="modal-fluxy-overlay" id="modalFluxy" hidden>
+        <section class="modal-fluxy" role="dialog" aria-modal="true" aria-labelledby="modalFluxyTitulo" aria-describedby="modalFluxyMensagem">
+            <div class="modal-fluxy-icone" id="modalFluxyIcone">
+                <i class="bi bi-check-circle"></i>
+            </div>
+
+            <h2 id="modalFluxyTitulo">Tudo certo!</h2>
+            <p id="modalFluxyMensagem">A ação foi concluída com sucesso.</p>
+
+            <div class="modal-fluxy-acoes">
+                <button type="button" id="modalFluxyCancelar" class="modal-fluxy-cancelar" hidden>Cancelar</button>
+                <button type="button" id="modalFluxyConfirmar" class="modal-fluxy-confirmar">Ok</button>
+            </div>
+        </section>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     
     <script src="/js/calendario.js"></script>
+    <script src="/js/logout.js"></script>
+
 </body>
 </html>

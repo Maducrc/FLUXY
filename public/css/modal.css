@@ -1,0 +1,156 @@
+/*MODAL*/
+@import url("variaveis.css");
+
+:root {
+    --cal-primary: #00CED1;
+    --cal-secondary: #67E8F9;
+    --cal-hover: #B9F7FF;
+    --cal-dark: #191B1F;
+    --cal-text: #0F172A;
+    --cal-muted: #64748B;
+    --cal-border: #E2E8F0;
+    --cal-background: #F8FAFC;
+    --cal-white: #FFFFFF;
+}
+
+.modal-fluxy-overlay[hidden],
+.modal-fluxy-acoes button[hidden] {
+    display: none;
+}
+
+.modal-fluxy-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(5, 10, 15, 0.75);
+    backdrop-filter: blur(5px);
+    animation: fluxy-fade-in 0.2s ease;
+}
+
+.modal-fluxy {
+    width: 100%;
+    max-width: 400px;
+    padding: 30px;
+    background: #191B1F;
+    border: 1px solid rgba(0, 206, 209, 0.35);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    animation: fluxy-modal-in 0.25s ease;
+}
+
+.modal-fluxy-icone {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(0, 206, 209, 0.13);
+    color: #00CED1;
+    font-size: 30px;
+}
+
+.modal-fluxy h2 {
+    margin: 0 0 10px;
+    color: #F8FAFC;
+    font-size: 21px;
+    font-weight: 600;
+}
+
+.modal-fluxy p {
+    margin: 0;
+    color: #CBD5E1;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.modal-fluxy-acoes {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.modal-fluxy-acoes button {
+    min-height: 42px;
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.modal-fluxy-confirmar {
+    border: 1px solid #00CED1;
+    background: #00CED1;
+    color: #0F172A;
+}
+
+.modal-fluxy-confirmar:hover {
+    background: #67E8F9;
+    border-color: #67E8F9;
+    transform: translateY(-1px);
+}
+
+.modal-fluxy-cancelar {
+    border: 1px solid #475569;
+    background: transparent;
+    color: #E2E8F0;
+}
+
+.modal-fluxy-cancelar:hover {
+    background: #292D33;
+}
+
+.modal-fluxy.erro .modal-fluxy-icone {
+    color: #F87171;
+    background: rgba(248, 113, 113, 0.12);
+}
+
+.modal-fluxy.aviso .modal-fluxy-icone {
+    color: #FBBF24;
+    background: rgba(251, 191, 36, 0.12);
+}
+
+.modal-fluxy.confirmacao .modal-fluxy-icone {
+    color: #67E8F9;
+    background: rgba(103, 232, 249, 0.12);
+}
+
+@keyframes fluxy-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fluxy-modal-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-fluxy {
+        padding: 24px 20px;
+    }
+
+    .modal-fluxy-acoes {
+        flex-direction: column-reverse;
+    }
+
+    .modal-fluxy-acoes button {
+        width: 100%;
+    }
+}

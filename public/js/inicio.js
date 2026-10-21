@@ -6,11 +6,88 @@ const listaComunicados = document.getElementById("listaComunicados");
 const filtroSetor = document.getElementById("filtroSetor");
 const filtroTipo = document.getElementById("filtroTipo");
 
-// Identifica o usuário conectado
 const paginaGeral = document.getElementById("paginaGeral");
 const usuarioId = Number(paginaGeral?.dataset.usuarioId);
 
-// Guarda o ID da publicação que está sendo editada
+const modalFluxy = document.getElementById("modalFluxy");
+const modalFluxyCaixa = modalFluxy.querySelector(".modal-fluxy");
+const modalFluxyIcone = document.getElementById("modalFluxyIcone");
+const modalFluxyTitulo = document.getElementById("modalFluxyTitulo");
+const modalFluxyMensagem = document.getElementById("modalFluxyMensagem");
+const modalFluxyConfirmar = document.getElementById("modalFluxyConfirmar");
+const modalFluxyCancelar = document.getElementById("modalFluxyCancelar");
+
+let temporizadorModal;
+
+function mostrarMensagem(tipo, titulo, mensagem) {
+    clearTimeout(temporizadorModal);
+
+    modalFluxyCaixa.className = `modal-fluxy ${tipo}`;
+    modalFluxyTitulo.textContent = titulo;
+    modalFluxyMensagem.textContent = mensagem;
+
+    const icones = {
+        sucesso: "bi-check-circle",
+        erro: "bi-x-circle",
+        aviso: "bi-exclamation-triangle",
+        confirmacao: "bi-question-circle"
+    };
+
+    modalFluxyIcone.replaceChildren();
+
+    const icone = document.createElement("i");
+    icone.className = `bi ${icones[tipo] || icones.aviso}`;
+    modalFluxyIcone.appendChild(icone);
+
+    modalFluxyCancelar.hidden = true;
+    modalFluxyConfirmar.textContent = "Entendi";
+    modalFluxy.hidden = false;
+
+    modalFluxyConfirmar.onclick = fecharModal;
+    modalFluxyConfirmar.focus();
+
+    if (tipo === "sucesso") {
+        temporizadorModal = setTimeout(fecharModal, 3500);
+    }
+}
+
+function fecharModal() {
+    clearTimeout(temporizadorModal);
+    modalFluxy.hidden = true;
+}
+
+function confirmarAcao(titulo, mensagem) {
+    clearTimeout(temporizadorModal);
+
+    modalFluxyCaixa.className = "modal-fluxy confirmacao";
+    modalFluxyTitulo.textContent = titulo;
+    modalFluxyMensagem.textContent = mensagem;
+
+    modalFluxyIcone.replaceChildren();
+
+    const icone = document.createElement("i");
+    icone.className = "bi bi-question-circle";
+    modalFluxyIcone.appendChild(icone);
+
+    modalFluxyCancelar.hidden = false;
+    modalFluxyConfirmar.textContent = "Confirmar";
+    modalFluxy.hidden = false;
+
+    return new Promise((resolve) => {
+        modalFluxyConfirmar.onclick = () => {
+            fecharModal();
+            resolve(true);
+        };
+
+        modalFluxyCancelar.onclick = () => {
+            fecharModal();
+            resolve(false);
+        };
+
+        modalFluxyCancelar.focus();
+    });
+}
+
 let publicacaoEmEdicao = null;
 
 const tiposPermitidos = [
@@ -27,7 +104,6 @@ const icones = {
     "Atualização": "bi-arrow-repeat"
 };
 
-// Carrega os setores da empresa
 async function carregarSetores() {
     const resposta = await fetch("/setores-empresa");
     const dados = await resposta.json();
@@ -51,7 +127,6 @@ async function carregarSetores() {
     });
 }
 
-// Formata a data
 function formatarData(data) {
     if (!data) return "Data indisponível";
 
@@ -70,7 +145,6 @@ function formatarData(data) {
     });
 }
 
-// Cria elementos de texto com segurança
 function criarTexto(tag, classe, texto) {
     const elemento = document.createElement(tag);
 
@@ -81,7 +155,6 @@ function criarTexto(tag, classe, texto) {
     return elemento;
 }
 
-// Cria botões de ação
 function criarBotao(texto, classe, icone) {
     const botao = document.createElement("button");
 
@@ -98,7 +171,6 @@ function criarBotao(texto, classe, icone) {
     return botao;
 }
 
-// Renderiza as publicações
 function renderizarPublicacoes(publicacoes) {
     listaComunicados.replaceChildren();
 
@@ -142,7 +214,6 @@ function renderizarPublicacoes(publicacoes) {
 
         cabecalho.appendChild(identificacao);
 
-        // Menu de ações: somente o autor vê os botões
         if (Number(post.usuario_id) === usuarioId) {
             const acoes = document.createElement("div");
             acoes.className = "acoes-publicacao";
@@ -176,7 +247,6 @@ function renderizarPublicacoes(publicacoes) {
             botaoMenu.addEventListener("click", () => {
                 const vaiAbrir = menu.hidden;
 
-                // Fecha os outros menus abertos
                 document.querySelectorAll(".menu-publicacao").forEach((outroMenu) => {
                     outroMenu.hidden = true;
                 });
@@ -221,7 +291,6 @@ function renderizarPublicacoes(publicacoes) {
     });
 }
 
-// Busca publicações respeitando os filtros
 async function carregarPublicacoes() {
     try {
         const parametros = new URLSearchParams({
@@ -230,7 +299,6 @@ async function carregarPublicacoes() {
         });
 
         const resposta = await fetch(`/publicacoes?${parametros}`);
-
         const dados = await resposta.json();
 
         if (!resposta.ok || !dados.sucesso) {
@@ -247,7 +315,6 @@ async function carregarPublicacoes() {
     }
 }
 
-// Prepara o formulário para editar
 function iniciarEdicao(post) {
     publicacaoEmEdicao = post.id;
 
@@ -256,7 +323,6 @@ function iniciarEdicao(post) {
 
     btnPublicar.textContent = "Salvar alterações";
 
-    // Adiciona um botão para cancelar a edição
     let botaoCancelarEdicao = document.getElementById("cancelarEdicao");
 
     if (!botaoCancelarEdicao) {
@@ -280,7 +346,6 @@ function iniciarEdicao(post) {
     });
 }
 
-// Cancela a edição
 function cancelarEdicao() {
     publicacaoEmEdicao = null;
     campoConteudo.value = "";
@@ -294,18 +359,25 @@ function cancelarEdicao() {
     }
 }
 
-// Publica ou salva alterações
 btnPublicar.addEventListener("click", async () => {
     const conteudo = campoConteudo.value.trim();
     const tipo = tipoPublicacao.value;
 
     if (!conteudo) {
-        alert("Digite o conteúdo da publicação.");
+        mostrarMensagem(
+            "aviso",
+            "Campo obrigatório",
+            "Digite o conteúdo do comunicado antes de publicar!"
+        );
         return;
     }
 
     if (!tiposPermitidos.includes(tipo)) {
-        alert("Selecione uma categoria válida.");
+        mostrarMensagem(
+            "aviso",
+            "Categoria inválida",
+            "Selecione uma categoria válida antes de continuar."
+        );
         return;
     }
 
@@ -334,24 +406,36 @@ btnPublicar.addEventListener("click", async () => {
 
         cancelarEdicao();
 
-        // Volta aos filtros gerais para encontrar o post atualizado
         filtroSetor.value = "todos";
         filtroTipo.value = "todos";
 
         await carregarPublicacoes();
 
+        mostrarMensagem(
+            "sucesso",
+            editando ? "Alterações salvas!" : "Publicação realizada!",
+            editando
+                ? "Sua publicação foi atualizada com sucesso."
+                : "Seu comunicado foi publicado com sucesso no feed geral."
+        );
+
     } catch (erro) {
         console.error("Erro ao salvar publicação:", erro);
-        alert(erro.message || "Não foi possível salvar a publicação.");
+
+        mostrarMensagem(
+            "erro",
+            "Ops! Algo deu errado",
+            erro.message || "Não foi possível salvar a publicação."
+        );
     } finally {
         btnPublicar.disabled = false;
     }
 });
 
-// Exclui uma publicação
 async function excluirPublicacao(id) {
-    const confirmar = confirm(
-        "Tem certeza de que deseja excluir esta publicação? Essa ação não poderá ser desfeita."
+    const confirmar = await confirmarAcao(
+        "Excluir publicação?",
+        "Essa ação não poderá ser desfeita. Deseja realmente excluir este comunicado?"
     );
 
     if (!confirmar) return;
@@ -369,17 +453,26 @@ async function excluirPublicacao(id) {
 
         await carregarPublicacoes();
 
+        mostrarMensagem(
+            "sucesso",
+            "Publicação excluída!",
+            "O comunicado foi removido com sucesso."
+        );
+
     } catch (erro) {
         console.error("Erro ao excluir publicação:", erro);
-        alert(erro.message || "Não foi possível excluir a publicação.");
+
+        mostrarMensagem(
+            "erro",
+            "Ops! Algo deu errado",
+            erro.message || "Não foi possível excluir a publicação."
+        );
     }
 }
 
-// Filtros
 filtroSetor.addEventListener("change", carregarPublicacoes);
 filtroTipo.addEventListener("change", carregarPublicacoes);
 
-// Inicializa o feed
 async function iniciarFeed() {
     try {
         if (!Number.isInteger(usuarioId) || usuarioId <= 0) {
@@ -392,7 +485,11 @@ async function iniciarFeed() {
         console.error("Erro ao iniciar o feed:", erro);
 
         listaComunicados.replaceChildren(
-            criarTexto("p", "feed-erro", erro.message || "Não foi possível carregar o feed.")
+            criarTexto(
+                "p",
+                "feed-erro",
+                erro.message || "Não foi possível carregar o feed."
+            )
         );
     }
 }
