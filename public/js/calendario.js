@@ -39,8 +39,15 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('fecharModal').addEventListener('click', function() {
         modal.hide();
     });
-    document.getElementById('botaoCancelar').addEventListener('click', function() {
-        modal.hide();
+
+    const botaoLimpar = document.getElementById('botaoLimpar');
+
+    botaoLimpar.addEventListener("click", function() {
+        document.getElementById('formEvento').reset();
+
+        document.querySelectorAll('.setor-checkbox').forEach(function(checkbox) {
+            checkbox.checked = false;
+        });
     });
 
     document.getElementById('botaoSalvarEvento').addEventListener('click', async () => {

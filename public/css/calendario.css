@@ -1,0 +1,485 @@
+@import url("variaveis.css");
+
+:root {
+    --cal-primary: #00CED1;
+    --cal-secondary: #67E8F9;
+    --cal-hover: #B9F7FF;
+    --cal-dark: #191B1F;
+    --cal-text: #0F172A;
+    --cal-muted: #64748B;
+    --cal-border: #E2E8F0;
+    --cal-background: #F8FAFC;
+    --cal-white: #FFFFFF;
+}
+
+body {
+    background-color: #000;
+    color: var(--cal-text);
+}
+
+/* Área principal */
+
+.conteudo {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px !important;
+}
+
+.conteudo header {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto 20px;
+    margin-top: 30px;
+    margin-left: 130px;
+
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+
+.conteudo header h1 {
+    margin: 0 0 8px;
+    color: var(--turquesa);
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.conteudo header p {
+    margin: 0;
+    color: var(--cal-border);
+    font-size: 15px;
+}
+
+#calendario {
+    width: 100%;
+    max-width: 1400px;
+    min-height: calc(100vh - 130px);
+    margin-left: 280px;
+    padding: 16px;
+    box-sizing: border-box;
+
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.05);
+}
+
+/* Título do mês */
+
+#calendario .fc-toolbar-title {
+    color: var(--cal-dark);
+    font-size: 23px;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+/* Botões do calendário */
+
+#calendario .fc-button {
+    padding: 9px 14px;
+    border: 1px solid var(--cal-primary);
+    border-radius: 8px;
+    background-color: var(--cal-primary);
+    color: var(--cal-dark);
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: none;
+    transition: background-color .2s ease, border-color .2s ease;
+}
+
+#calendario .fc-view-harness {
+    min-height: calc(100vh - 260px);
+}
+
+#calendario .fc-button:hover {
+    border-color: #00B5B9;
+    background-color: var(--cal-hover);
+    color: var(--cal-dark);
+}
+
+#calendario .fc-button:focus,
+#calendario .fc-button:active {
+    box-shadow: 0 0 0 3px rgba(0, 206, 209, .2) !important;
+}
+
+#calendario .fc-button:disabled {
+    border-color: #D1D5DB;
+    background-color: #E5E7EB;
+    color: #64748B;
+    opacity: 0.8;
+}
+
+#calendario .fc-button-group {
+    gap: 5px;
+}
+
+#calendario .fc-button-group > .fc-button {
+    border-radius: 8px;
+}
+
+/* Cabeçalho dos dias */
+
+#calendario .fc-col-header-cell {
+    padding: 12px 0;
+    background-color: #ECFEFF;
+}
+
+#calendario .fc-col-header-cell-cushion {
+    color: #0F766E;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: capitalize;
+}
+
+/* Células dos dias */
+
+#calendario .fc-daygrid-day {
+    transition: background-color .2s ease;
+}
+
+#calendario .fc-daygrid-day:hover {
+    background-color: #F0FDFF;
+}
+
+#calendario .fc-daygrid-day-number {
+    padding: 10px;
+    color: var(--cal-text);
+    font-size: 13px;
+    text-decoration: none;
+}
+
+#calendario .fc-day-today {
+    background-color: #E6FCFC !important;
+}
+
+#calendario .fc-day-today .fc-daygrid-day-number {
+    color: #008F93;
+    font-weight: 800;
+}
+
+/* Eventos exibidos no calendário */
+
+#calendario .fc-event {
+    padding: 4px 6px;
+    border: 1px solid var(--cal-primary);
+    border-radius: 6px;
+    background-color: var(--cal-primary);
+    color: var(--cal-dark);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#calendario .fc-event:hover {
+    border-color: #00AEB2;
+    background-color: var(--cal-hover);
+}
+
+#calendario .fc-event-title {
+    font-weight: 600;
+}
+
+#calendario .fc-timegrid-slot {
+    height: 42px;
+}
+
+#calendario .fc-scrollgrid,
+#calendario .fc-scrollgrid td,
+#calendario .fc-scrollgrid th {
+    border-color: var(--cal-border);
+}
+
+#novoEvento .modal-content {
+    overflow: hidden;
+    border: 1px solid rgba(0, 206, 209, .25);
+    border-radius: 18px;
+    background-color: var(--cal-white);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
+}
+
+#novoEvento .modal-header {
+    padding: 22px 26px;
+    border-bottom: 1px solid var(--cal-border);
+    background-color: #ECFEFF;
+}
+
+#novoEvento .modal-title {
+    color: var(--cal-dark);
+    font-size: 21px;
+    font-weight: 700;
+}
+
+#fecharModal {
+    display: inline-block;
+    margin-top: 8px;
+    margin-left: 280px;
+    padding: 7px 12px;
+
+    color: #DC3545;
+    background-color: transparent;
+    border: 1px solid #DC3545;
+    border-radius: 7px;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+}
+
+#fecharModal:hover {
+    background-color: #DC3545;
+    color: var(--cal-dark);
+}
+
+#novoEvento .modal-body {
+    padding: 26px;
+}
+
+/* Campos do formulário */
+
+#formEvento > div {
+    margin-bottom: 20px;
+}
+
+#formEvento label {
+    display: block;
+    margin-bottom: 9px;
+    color: var(--cal-text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#formEvento input:not([type="checkbox"]),
+#formEvento textarea {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 13px;
+    border: 1px solid #CBD5E1;
+    border-radius: 9px;
+    background-color: var(--cal-white);
+    color: var(--cal-text);
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+#formEvento textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+#formEvento input:not([type="checkbox"]):focus,
+#formEvento textarea:focus {
+    border-color: var(--cal-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 206, 209, .17);
+}
+
+/* Seleção de setores */
+
+#novoEvento .setores-evento {
+    padding: 16px;
+    border: 1px solid var(--cal-border);
+    border-radius: 12px;
+    background-color: #F8FAFC;
+}
+
+#novoEvento .setores-evento > label {
+    color: var(--cal-text);
+}
+
+#novoEvento .form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 25px;
+}
+
+#novoEvento .form-check-input {
+    float: none;
+    flex-shrink: 0;
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    border-color: #94A3B8;
+    cursor: pointer;
+}
+
+#novoEvento .form-check-input:checked {
+    border-color: var(--cal-primary);
+    background-color: var(--cal-primary);
+}
+
+#novoEvento .form-check-input:focus {
+    border-color: var(--cal-primary);
+    box-shadow: 0 0 0 3px rgba(0, 206, 209, .17);
+}
+
+#novoEvento .form-check-label {
+    margin: 0;
+    color: var(--cal-text);
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+#novoEvento .setores-evento small {
+    display: block;
+    margin-top: 12px;
+    color: var(--cal-muted);
+    font-size: 12px;
+}
+
+/* Rodapé do modal */
+
+#novoEvento .modal-footer {
+    gap: 10px;
+    padding: 18px 26px;
+    border-top: 1px solid var(--cal-border);
+    background-color: #F8FAFC;
+}
+
+#botaoLimpar,
+#botaoSalvarEvento {
+    min-width: 100px;
+    padding: 10px 18px;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color .2s ease, border-color .2s ease;
+}
+
+#botaoLimpar {
+    border: 1px solid #CBD5E1;
+    background-color: var(--cal-white);
+    color: var(--cal-text);
+}
+
+#botaoLimpar:hover {
+    border-color: #94A3B8;
+    background-color: #F1F5F9;
+}
+
+#botaoSalvarEvento {
+    border: 1px solid var(--cal-primary);
+    background-color: var(--cal-primary);
+    color: var(--cal-dark);
+}
+
+#botaoSalvarEvento:hover {
+    border-color: #00B5B9;
+    background-color: var(--cal-hover);
+}
+
+#botaoLimpar:focus-visible,
+#botaoSalvarEvento:focus-visible,
+#fecharModal:focus-visible {
+    outline: 3px solid rgba(0, 206, 209, .35);
+    outline-offset: 2px;
+}
+
+/* Fundo atrás do modal */
+
+#novoEvento.modal {
+    backdrop-filter: blur(3px);
+}
+
+/* ========================================
+   RESPONSIVIDADE
+======================================== */
+
+@media (max-width: 992px) {
+    .conteudo {
+        padding: 10px !important;
+    }
+
+    #calendario {
+        padding: 8px;
+        min-height: auto;
+    }
+
+    #calendario .fc-toolbar {
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    #calendario .fc-toolbar-title {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .conteudo {
+        padding: 14px !important;
+    }
+
+    .conteudo header h1 {
+        font-size: 25px;
+    }
+
+    .conteudo header p {
+        font-size: 13px;
+    }
+
+    #calendario {
+        padding: 10px;
+        border-radius: 12px;
+    }
+
+
+    #calendario .fc-view-harness {
+        min-height: 0;
+    }
+
+    #calendario .fc-daygrid-day-frame {
+        min-height: 65px;
+    }
+
+    #calendario .fc-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #calendario .fc-toolbar-chunk {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    #calendario .fc-toolbar-title {
+        font-size: 19px;
+        text-align: center;
+    }
+
+    #calendario .fc-button {
+        padding: 7px 9px;
+        font-size: 11px;
+    }
+
+    #calendario .fc-col-header-cell-cushion,
+    #calendario .fc-daygrid-day-number {
+        font-size: 11px;
+    }
+
+    #novoEvento .modal-header,
+    #novoEvento .modal-body {
+        padding: 18px;
+    }
+
+    #novoEvento .modal-footer {
+        padding: 14px 18px;
+    }
+}

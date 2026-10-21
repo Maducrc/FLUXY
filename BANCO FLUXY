@@ -70,3 +70,6 @@ INSERT INTO usuarios
 (nome, usuario, senha, sigla, perfil)
 VALUES
 ('Administrador', 'admin', '$2b$10$J6erI0pqXU1oJodiW5rTy.lFRjeBW0jVsgHR5u/rmifJMiTMctnkC', 'ADM', 'administrador');
+
+ALTER TABLE publicacoes
+ADD COLUMN criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;

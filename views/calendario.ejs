@@ -12,64 +12,69 @@
     
     <link rel="stylesheet" href="/css/inicio.css">
     <link rel="stylesheet" href="/css/variaveis.css">
+    <link rel="stylesheet" href="/css/calendario.css">
 </head>
 <body>
     <div class="layout">
         
         <aside class="sidebar">
+
             <div class="logo">
                 <img src="/img/logo.png" alt="Fluxy">
             </div>
 
             <nav class="menu">
+
                 <a href="/dashboard" class="menu-item">
-                    <i></i>
+                    <i class="bi bi-house-door"></i>
                     <span>Geral</span>
                 </a>
+
                 <a href="#" class="menu-item">
-                    <i></i>
+                    <i class="bi bi-chat-square-text"></i>
                     <span>Acompanhamentos</span>
                 </a>
+
                 <div class="setor">
+
                     <a href="#" class="menu-item">
-                        <i></i>
-                        <span>
-                            <% if (usuario.perfil === 'admin_empresa') { %>
-                                <%= usuario.empresa %>
-                            <% } else { %>
-                                <%= usuario.setor %>
-                            <% } %>
-                        </span>
+                        <i class="bi bi-diagram-3"></i>
+                        <span><%= usuario.setor %></span>
                     </a>
-                    <a href="#" class="menu-item">
-                        <i></i>
-                        <span>Visão Geral do Setor</span>
-                    </a>
+
                     <a href="/calendario" class="menu-item ativo">
-                        <i></i>
+                        <i class="bi bi-calendar3"></i>
                         <span>Calendário</span>
                     </a>
+
                     <a href="#" class="menu-item">
-                        <i></i>
+                        <i class="bi bi-exclamation-circle"></i>
                         <span>Pendências</span>
                     </a>
+
                     <a href="#" class="menu-item">
-                        <i></i>
+                        <i class="bi bi-graph-up-arrow"></i>
                         <span>Indicadores</span>
                     </a>
+
                 </div>
+
             </nav>
 
             <div class="menu-final">
-                <a href="#" class="menu-item">
-                    <i></i>
-                    <span>Configurações</span>
+
+                 <a href="#" class="menu-item">
+                        <i class="bi bi-gear"></i>
+                        <span>Configurações</span>
                 </a>
-                <a href="/logout" class="menu-item">
-                    <i></i>
-                    <span>Sair</span>
+
+                 <a href="/logout" class="menu-item">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Sair</span>
                 </a>
+
             </div>
+
         </aside>
 
         <main class="conteudo" style="flex: 1; padding: 20px;">
@@ -89,7 +94,9 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Novo Evento</h5>
-                    <button type="button" id="fecharModal">X</button>
+                    <button type="button" id="fecharModal">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <form id="formEvento">
@@ -127,7 +134,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="botaoCancelar">Cancelar</button>
+                    <button type="button" id="botaoLimpar">Limpar</button>
                     <button type="button" id="botaoSalvarEvento">Salvar</button>
                 </div>
             </div>

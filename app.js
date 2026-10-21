@@ -230,6 +230,27 @@ app.post("/publicacoes", (req, res) => {
 
     const { conteudo, tipo } = req.body;
 
+    const tiposPermitidos = [
+        "Aviso",
+        "Agendamento",
+        "Comunicado",
+        "Atualização"
+    ];
+
+    if (!conteudo || !conteudo.trim()) {
+        return res.status(400).json({
+            sucesso: false,
+            mensagem: "O conteúdo da publicação é obrigatório."
+        });
+    }
+
+    if (!tiposPermitidos.includes(tipo)) {
+        return res.status(400).json({
+            sucesso: false,
+            mensagem: "Categoria inválida."
+        });
+    }
+
     const usuarioId = req.session.usuario.id;
 
     const sql = `
@@ -258,6 +279,225 @@ app.post("/publicacoes", (req, res) => {
             });
         }
     );
+});
+
+app.get("/publicacoes", (req, res) => {
+    if (!req.session.usuario) {
+        return res.status(401).json({
+            sucesso: false,
+            mensagem: "Usuário não autenticado."
+        });
+    }
+
+    const empresaId = req.session.usuario.empresa_id;
+
+    const { setorId, tipo } = req.query;
+
+    let sql = `
+        SELECT
+            p.id,
+            p.usuario_id,
+            p.conteudo,
+            p.tipo,
+            p.criado_em,
+            u.nome AS autor_nome,
+            u.sigla,
+            u.setor_id,
+            s.setor AS setor_nome
+        FROM publicacoes p
+        INNER JOIN usuarios u ON p.usuario_id = u.id
+        INNER JOIN setores s ON u.setor_id = s.id
+        WHERE u.empresa_id = ?
+    `;
+
+    const parametros = [empresaId];
+
+    if (setorId && setorId !== "todos") {
+        sql += " AND u.setor_id = ?";
+        parametros.push(Number(setorId));
+    }
+
+    if (tipo && tipo !== "todos") {
+        sql += " AND p.tipo = ?";
+        parametros.push(tipo);
+    }
+
+    sql += " ORDER BY p.criado_em DESC";
+
+    db.query(sql, parametros, (erro, resultados) => {
+        if (erro) {
+            console.error("Erro ao buscar publicações:", erro);
+
+            return res.status(500).json({
+                sucesso: false,
+                mensagem: "Erro ao carregar publicações."
+            });
+        }
+
+        res.json({
+            sucesso: true,
+            publicacoes: resultados
+        });
+    });
+});
+
+app.put("/publicacoes/:id", (req, res) => {
+    if (!req.session.usuario) {
+        return res.status(401).json({
+            sucesso: false,
+            mensagem: "Faça login para continuar."
+        });
+    }
+
+    const publicacaoId = Number(req.params.id);
+    const usuarioId = req.session.usuario.id;
+    const { conteudo, tipo } = req.body;
+
+    const tiposPermitidos = [
+        "Aviso",
+        "Agendamento",
+        "Comunicado",
+        "Atualização"
+    ];
+
+    if (!Number.isInteger(publicacaoId) || publicacaoId <= 0) {
+        return res.status(400).json({
+            sucesso: false,
+            mensagem: "Publicação inválida."
+        });
+    }
+
+    if (typeof conteudo !== "string" || !conteudo.trim()) {
+        return res.status(400).json({
+            sucesso: false,
+            mensagem: "O conteúdo não pode ficar vazio."
+        });
+    }
+
+    if (!tiposPermitidos.includes(tipo)) {
+        return res.status(400).json({
+            sucesso: false,
+            mensagem: "Categoria inválida."
+        });
+    }
+
+    const sql = `
+        UPDATE publicacoes
+        SET conteudo = ?, tipo = ?
+        WHERE id = ? AND usuario_id = ?
+    `;
+
+    db.query(
+        sql,
+        [conteudo.trim(), tipo, publicacaoId, usuarioId],
+        (erro, resultado) => {
+            if (erro) {
+                console.error("Erro ao editar publicação:", erro);
+
+                return res.status(500).json({
+                    sucesso: false,
+                    mensagem: "Erro ao editar publicação."
+                });
+            }
+
+            if (resultado.affectedRows === 0) {
+                return res.status(404).json({
+                    sucesso: false,
+                    mensagem: "Publicação não encontrada ou você não tem permissão para editá-la."
+                });
+            }
+
+            res.json({
+                sucesso: true,
+                mensagem: "Publicação atualizada com sucesso!"
+            });
+        }
+    );
+});
+
+app.delete("/publicacoes/:id", (req, res) => {
+    if (!req.session.usuario) {
+        return res.status(401).json({
+            sucesso: false,
+            mensagem: "Faça login para continuar."
+        });
+    }
+
+    const publicacaoId = Number(req.params.id);
+    const usuarioId = req.session.usuario.id;
+
+    if (!Number.isInteger(publicacaoId) || publicacaoId <= 0) {
+        return res.status(400).json({
+            sucesso: false,
+            mensagem: "Publicação inválida."
+        });
+    }
+
+    const sql = `
+        DELETE FROM publicacoes
+        WHERE id = ? AND usuario_id = ?
+    `;
+
+    db.query(
+        sql,
+        [publicacaoId, usuarioId],
+        (erro, resultado) => {
+            if (erro) {
+                console.error("Erro ao excluir publicação:", erro);
+
+                return res.status(500).json({
+                    sucesso: false,
+                    mensagem: "Erro ao excluir publicação."
+                });
+            }
+
+            if (resultado.affectedRows === 0) {
+                return res.status(404).json({
+                    sucesso: false,
+                    mensagem: "Publicação não encontrada ou você não tem permissão para excluí-la."
+                });
+            }
+
+            res.json({
+                sucesso: true,
+                mensagem: "Publicação excluída com sucesso!"
+            });
+        }
+    );
+});
+
+app.get("/setores-empresa", (req, res) => {
+    if (!req.session.usuario) {
+        return res.status(401).json({
+            sucesso: false,
+            mensagem: "Usuário não autenticado."
+        });
+    }
+
+    const empresaId = req.session.usuario.empresa_id;
+
+    const sql = `
+        SELECT id, setor
+        FROM setores
+        WHERE empresa_id = ?
+        ORDER BY setor ASC
+    `;
+
+    db.query(sql, [empresaId], (erro, resultados) => {
+        if (erro) {
+            console.error("Erro ao buscar setores:", erro);
+
+            return res.status(500).json({
+                sucesso: false,
+                mensagem: "Erro ao carregar setores."
+            });
+        }
+
+        res.json({
+            sucesso: true,
+            setores: resultados
+        });
+    });
 });
 
 //login lógica com senha hash 
