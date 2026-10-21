@@ -328,6 +328,9 @@ app.post("/login", async (req, res) => {
 
 //Provisório
 app.get("/dashboard", verificarLogin, (req, res) => {
+    if (req.session.usuario.perfil === 'administrador') {
+        return res.redirect("/admin");
+    }
 
     const usuarioId = req.session.usuario.id;   
 
@@ -337,6 +340,7 @@ app.get("/dashboard", verificarLogin, (req, res) => {
         usuarios.nome,
         usuarios.usuario,
         usuarios.sigla,
+        usuarios.perfil,
         empresas.empresa AS empresa,
         setores.setor AS setor
     FROM usuarios
@@ -551,6 +555,9 @@ app.get("/admin", verificarAdm, (req, res) => {
 });
 
 app.get("/calendario", verificarLogin, (req, res) => {
+    if (req.session.usuario.perfil === 'administrador') {
+        return res.redirect("/admin");
+    }
     const usuarioId = req.session.usuario.id;
     const perfil = req.session.usuario.perfil;
 
@@ -569,12 +576,11 @@ app.get("/calendario", verificarLogin, (req, res) => {
         let sqlSetores = "SELECT id, setor FROM setores WHERE empresa_id = ?";
         let paramsSetores = [dadosUsuario.empresa_id];
 
-        if (perfil === "funcionario") {
-            sqlSetores = "SELECT id, setor FROM setores WHERE id = ?";
-            paramsSetores = [dadosUsuario.setor_id];
-        }
-
         db.query(sqlSetores, paramsSetores, (erroSetores, setores) => {
+            if (erroSetores) {
+                console.error("Erro ao buscar setores:", erroSetores);
+                return res.status(500).send("Erro ao carregar setores.");
+            }
             res.render("calendario", {
                 usuario: dadosUsuario,
                 setores: setores,
@@ -585,31 +591,84 @@ app.get("/calendario", verificarLogin, (req, res) => {
 });
 
 app.get("/eventos", verificarLogin, (req, res) => {
+    const empresaId = req.session.usuario.empresa_id;
+    const setorId = req.session.usuario.setor_id;
+    const usuarioId = req.session.usuario.id;
+    const perfil = req.session.usuario.perfil;
     
-    const sql = "SELECT id, titulo AS title, REPLACE(data_inicio, ' ', 'T') AS start, REPLACE(data_fim, ' ', 'T') AS end, descricao AS description FROM eventos";
+    let sql;
+    let params = [];
     
-    db.query(sql, (erro, resultados) => {
-        if (erro) return res.status(500).json({ erro: "Erro ao buscar eventos" });
+    if (perfil === 'admin_empresa') {
+        sql = "SELECT id, titulo AS title, REPLACE(data_inicio, ' ', 'T') AS start, REPLACE(data_fim, ' ', 'T') AS end, descricao AS description FROM eventos WHERE empresa_id = ?";
+        params = [empresaId];
+    } else {
+        sql = `
+            SELECT DISTINCT e.id, e.titulo AS title, REPLACE(e.data_inicio, ' ', 'T') AS start, REPLACE(e.data_fim, ' ', 'T') AS end, e.descricao AS description 
+            FROM eventos e
+            WHERE e.empresa_id = ? 
+            AND (
+                e.usuario_id = ? 
+                OR e.id IN (SELECT evento_id FROM eventos_setores WHERE setor_id = ?)
+                OR e.id NOT IN (SELECT evento_id FROM eventos_setores)
+            )
+        `;
+        params = [empresaId, usuarioId, setorId];
+    }
+    
+    db.query(sql, params, (erro, resultados) => {
+        if (erro) {
+            console.error("Erro ao buscar eventos:", erro);
+            return res.status(500).json({ erro: "Erro ao buscar eventos" });
+        }
         res.json(resultados);
     });
 });
 
 app.post("/eventos", verificarLogin, (req, res) => {
-    const { titulo, data_inicio, data_fim, descricao } = req.body;
+    const { titulo, data_inicio, data_fim, descricao, setores } = req.body;
     const usuarioId = req.session.usuario.id;
+    const empresaId = req.session.usuario.empresa_id;
+    const setorUsuarioLogado = req.session.usuario.setor_id;
+    const perfil = req.session.usuario.perfil;
 
     if (!titulo || !data_inicio || !data_fim) {
         return res.status(400).json({ sucesso: false, mensagem: "Preencha o título e a data." });
     }
 
-    const sql = "INSERT INTO eventos (usuario_id, titulo, data_inicio, data_fim, descricao) VALUES (?, ?, ?, ?, ?)";
-    
-    db.query(sql, [usuarioId, titulo, data_inicio, data_fim, descricao], (erro) => {
+    let setoresEscolhidos = setores || [];
+    if (perfil === 'funcionario' && setoresEscolhidos.length === 0) {
+        setoresEscolhidos.push(setorUsuarioLogado);
+    }
+
+    const sqlEvento = `
+        INSERT INTO eventos 
+        (usuario_id, empresa_id, titulo, data_inicio, data_fim, descricao) 
+        VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(sqlEvento, [usuarioId, empresaId, titulo, data_inicio, data_fim, descricao], (erro, resultado) => {
         if (erro) {
             console.error("Erro ao salvar evento:", erro);
             return res.status(500).json({ sucesso: false, mensagem: "Erro ao salvar evento." });
         }
-        res.json({ sucesso: true });
+
+        const eventoId = resultado.insertId;
+
+        if (setoresEscolhidos.length > 0) {
+            const sqlSetores = "INSERT INTO eventos_setores (evento_id, setor_id) VALUES ?";
+            const valores = setoresEscolhidos.map(setorId => [eventoId, setorId]);
+
+            db.query(sqlSetores, [valores], (erroSetores) => {
+                if (erroSetores) {
+                    console.error("Erro ao vincular setores ao evento:", erroSetores);
+                    return res.status(500).json({ sucesso: false, mensagem: "Evento criado, mas erro ao vincular setores." });
+                }
+                res.json({ sucesso: true });
+            });
+        } else {
+            res.json({ sucesso: true });
+        }
     });
 });
 
