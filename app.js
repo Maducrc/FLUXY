@@ -838,13 +838,20 @@ app.get("/eventos", verificarLogin, (req, res) => {
     
     let sql;
     let params = [];
-    
+
     if (perfil === 'admin_empresa') {
-        sql = "SELECT id, titulo AS title, REPLACE(data_inicio, ' ', 'T') AS start, REPLACE(data_fim, ' ', 'T') AS end, descricao AS description FROM eventos WHERE empresa_id = ?";
+        sql = `
+            SELECT e.id, e.titulo AS title, REPLACE(e.data_inicio, ' ', 'T') AS start, REPLACE(e.data_fim, ' ', 'T') AS end, 
+            e.descricao, e.usuario_id,
+            (SELECT GROUP_CONCAT(setor_id) FROM eventos_setores WHERE evento_id = e.id) as setores_ids
+            FROM eventos e WHERE e.empresa_id = ?
+        `;
         params = [empresaId];
     } else {
         sql = `
-            SELECT DISTINCT e.id, e.titulo AS title, REPLACE(e.data_inicio, ' ', 'T') AS start, REPLACE(e.data_fim, ' ', 'T') AS end, e.descricao AS description 
+            SELECT DISTINCT e.id, e.titulo AS title, REPLACE(e.data_inicio, ' ', 'T') AS start, REPLACE(e.data_fim, ' ', 'T') AS end, 
+            e.descricao, e.usuario_id,
+            (SELECT GROUP_CONCAT(setor_id) FROM eventos_setores WHERE evento_id = e.id) as setores_ids
             FROM eventos e
             WHERE e.empresa_id = ? 
             AND (
@@ -857,11 +864,21 @@ app.get("/eventos", verificarLogin, (req, res) => {
     }
     
     db.query(sql, params, (erro, resultados) => {
-        if (erro) {
-            console.error("Erro ao buscar eventos:", erro);
-            return res.status(500).json({ erro: "Erro ao buscar eventos" });
-        }
-        res.json(resultados);
+        if (erro) return res.status(500).json({ erro: "Erro ao buscar eventos" });
+
+        const eventosFormatados = resultados.map(evento => ({
+            id: evento.id,
+            title: evento.title,
+            start: evento.start,
+            end: evento.end,
+            extendedProps: {
+                descricao: evento.descricao,
+                usuario_id: evento.usuario_id,
+                setores: evento.setores_ids ? evento.setores_ids.split(',') : []
+            }
+        }));
+        
+        res.json(eventosFormatados);
     });
 });
 
@@ -909,6 +926,61 @@ app.post("/eventos", verificarLogin, (req, res) => {
         } else {
             res.json({ sucesso: true });
         }
+    });
+});
+
+// excluir
+app.delete("/eventos/:id", verificarLogin, (req, res) => {
+    const eventoId = req.params.id;
+    const usuarioId = req.session.usuario.id;
+    const perfil = req.session.usuario.perfil;
+
+    const sqlVerifica = "SELECT usuario_id FROM eventos WHERE id = ?";
+    db.query(sqlVerifica, [eventoId], (erro, resultados) => {
+        if (erro || resultados.length === 0) return res.status(404).json({ sucesso: false, mensagem: "Evento não encontrado." });
+
+        if (perfil !== 'admin_empresa' && resultados[0].usuario_id !== usuarioId) {
+            return res.status(403).json({ sucesso: false, mensagem: "Você não tem permissão para excluir este evento." });
+        }
+
+        const sqlDelete = "DELETE FROM eventos WHERE id = ?";
+        db.query(sqlDelete, [eventoId], (erroDelete) => {
+            if (erroDelete) return res.status(500).json({ sucesso: false, mensagem: "Erro ao excluir." });
+            res.json({ sucesso: true });
+        });
+    });
+});
+
+// alterar
+app.put("/eventos/:id", verificarLogin, (req, res) => {
+    const eventoId = req.params.id;
+    const { titulo, data_inicio, data_fim, descricao, setores } = req.body;
+    const usuarioId = req.session.usuario.id;
+    const perfil = req.session.usuario.perfil;
+
+    const sqlVerifica = "SELECT usuario_id FROM eventos WHERE id = ?";
+    db.query(sqlVerifica, [eventoId], (erro, resultados) => {
+        if (erro || resultados.length === 0) return res.status(404).json({ sucesso: false });
+
+        if (perfil !== 'admin_empresa' && resultados[0].usuario_id !== usuarioId) {
+            return res.status(403).json({ sucesso: false, mensagem: "Sem permissão para alterar." });
+        }
+
+        const sqlUpdate = "UPDATE eventos SET titulo = ?, data_inicio = ?, data_fim = ?, descricao = ? WHERE id = ?";
+        db.query(sqlUpdate, [titulo, data_inicio, data_fim, descricao, eventoId], (erroUpdate) => {
+            if (erroUpdate) return res.status(500).json({ sucesso: false });
+
+            db.query("DELETE FROM eventos_setores WHERE evento_id = ?", [eventoId], () => {
+                if (setores && setores.length > 0) {
+                    const valores = setores.map(setorId => [eventoId, setorId]);
+                    db.query("INSERT INTO eventos_setores (evento_id, setor_id) VALUES ?", [valores], () => {
+                        res.json({ sucesso: true });
+                    });
+                } else {
+                    res.json({ sucesso: true });
+                }
+            });
+        });
     });
 });
 
