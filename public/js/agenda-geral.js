@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", async () => {
     const listaAgenda = document.getElementById("listaAgendaGeral");
 
@@ -25,11 +26,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             const inicio = new Date(evento.start);
             const fim = new Date(evento.end);
 
-            // Cartão do evento
             const item = document.createElement("div");
             item.classList.add("agenda-evento");
 
-            // Data do evento
             const data = document.createElement("div");
             data.classList.add("agenda-evento-data");
 
@@ -46,7 +45,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             data.append(dia, mes);
 
-            // Informações do evento
             const detalhes = document.createElement("div");
             detalhes.classList.add("agenda-evento-detalhes");
 
@@ -65,11 +63,83 @@ document.addEventListener("DOMContentLoaded", async () => {
                     minute: "2-digit"
                 })}`;
 
-            detalhes.append(titulo, horario);
-            item.append(data, detalhes);
+            // Status de conclusão
+            const status = document.createElement("span");
+            status.classList.add("agenda-evento-status");
+
+            // Botão de check
+            const botaoConcluir = document.createElement("button");
+            botaoConcluir.type = "button";
+            botaoConcluir.classList.add("btn-concluir-agenda");
+
+            function atualizarVisual(concluido) {
+                status.textContent = concluido ? "Concluído" : "Pendente";
+
+                status.classList.toggle("concluido", concluido);
+                item.classList.toggle("evento-concluido", concluido);
+
+                botaoConcluir.innerHTML = concluido
+                    ? '<i class="bi bi-arrow-counterclockwise"></i>'
+                    : '<i class="bi bi-check-lg"></i>';
+
+                botaoConcluir.title = concluido
+                    ? "Desmarcar conclusão"
+                    : "Marcar como concluído";
+
+                botaoConcluir.setAttribute(
+                    "aria-label",
+                    botaoConcluir.title
+                );
+            }
+
+            atualizarVisual(Boolean(evento.concluido));
+
+            botaoConcluir.addEventListener("click", async () => {
+                const novoStatus = !Boolean(evento.concluido);
+
+                botaoConcluir.disabled = true;
+
+                try {
+                    const resposta = await fetch(
+                        `/eventos/${evento.id}/concluir`,
+                        {
+                            method: "PATCH",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                concluido: novoStatus
+                            })
+                        }
+                    );
+
+                    const dados = await resposta.json();
+
+                    if (!resposta.ok || !dados.sucesso) {
+                        throw new Error(
+                            dados.mensagem || "Não foi possível atualizar o evento."
+                        );
+                    }
+
+                    evento.concluido = novoStatus;
+                    atualizarVisual(novoStatus);
+
+                } catch (erro) {
+                    console.error("Erro ao concluir evento:", erro);
+                    alert(erro.message || "Erro ao atualizar o evento.");
+                } finally {
+                    botaoConcluir.disabled = false;
+                }
+            });
+
+            detalhes.append(titulo, horario, status);
+            item.append(data, detalhes, botaoConcluir);
             listaAgenda.appendChild(item);
         });
-    } catch (erro) {
+
+    } 
+    
+    catch (erro) {
         console.error("Erro na Agenda Geral:", erro);
         listaAgenda.textContent = "Não foi possível carregar os eventos.";
     }

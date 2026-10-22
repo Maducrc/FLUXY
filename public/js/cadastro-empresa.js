@@ -1,54 +1,94 @@
+const listaSetores = document.getElementById("listaSetores");
+const adicionarSetor = document.getElementById("adicionarSetor");
 
-document.addEventListener("DOMContentLoaded", async () => {
-    console.log("1. JavaScript da Agenda Geral carregado.");
+adicionarSetor.addEventListener("click", () => {
 
-    const listaAgenda = document.getElementById("listaAgendaGeral");
+    const novoSetor = document.createElement("div");
 
-    console.log("2. Elemento da agenda:", listaAgenda);
+    novoSetor.classList.add("setor-item");
 
-    if (!listaAgenda) {
-        console.error("O elemento listaAgendaGeral não foi encontrado no HTML.");
-        return;
+    novoSetor.innerHTML = `
+        <input type="text" name="setor" placeholder="digite o nome do setor">        
+        <button type="button" class="remover-setor">Remover</button>
+    `;
+
+    listaSetores.appendChild(novoSetor);
+});
+
+listaSetores.addEventListener("click", (event) => {
+
+    if (event.target.classList.contains("remover-setor")) {
+
+        const setor = event.target.parentElement;
+
+        setor.remove();
+
     }
 
+});
+
+const formulario = document.getElementById("cadastroEmpresaForm");
+
+formulario.addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+    const nomeEmpresa = document.getElementById("empresa").value;
+    const camposSetor = document.querySelectorAll('input[name="setor"]');
+    const setores = [];
+
+    camposSetor.forEach((campo) => {
+        
+        const nomeSetor = campo.value.trim();
+
+        if(nomeSetor !== "") {
+            setores.push(nomeSetor);
+        }
+
+    });
+
+    console.log("Empresa", nomeEmpresa);
+    console.log("Setores:", setores);
+
     try {
-        console.log("3. Buscando /agenda-geral...");
+        const resposta = await fetch("/cadastro-empresa", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-        const resposta = await fetch("/agenda-geral");
-
-        console.log("4. Status da resposta:", resposta.status);
+            body: JSON.stringify({
+                empresa: nomeEmpresa,
+                setores: setores
+            })
+        });
 
         const dados = await resposta.json();
 
-        console.log("5. Eventos recebidos:", dados);
+        console.log("Resposta do Servidor:", dados);
 
-        listaAgenda.replaceChildren();
+        if (dados.sucesso) {
+            const resumoSetores = setores.join(", ");
 
-        if (!Array.isArray(dados) || dados.length === 0) {
-            listaAgenda.textContent = "Nenhum próximo evento.";
-            return;
+            const confirmar = window.confirm(
+                `${dados.mensagem}\n\n` +
+                `Empresa: ${nomeEmpresa}\n` +
+                `Setores: ${resumoSetores}\n\n` +
+                `Confirma as informações e deseja voltar ao painel administrativo?`
+            );
+
+            if (confirmar) {
+                window.location.href = "/admin";
+            }
+        } 
+        
+        else {
+            alert(`Não foi possível cadastrar a empresa: ${dados.mensagem}`);
         }
-
-        dados.forEach((evento) => {
-            const item = document.createElement("div");
-            item.classList.add("agenda-evento");
-
-            const titulo = document.createElement("strong");
-            titulo.textContent = evento.title || evento.titulo || "Evento sem título";
-
-            const data = document.createElement("p");
-            const dataEvento = evento.start || evento.data_inicio;
-
-            data.textContent = dataEvento
-                ? new Date(dataEvento).toLocaleString("pt-BR")
-                : "Data não informada";
-
-            item.append(titulo, data);
-            listaAgenda.appendChild(item);
-        });
-
-    } catch (erro) {
-        console.error("Erro ao carregar a Agenda Geral:", erro);
-        listaAgenda.textContent = "Não foi possível carregar os eventos.";
     }
+
+    catch (erro){
+        console.error("Erro no fetch:", erro);
+    }
+
 });

@@ -91,44 +91,54 @@
     <div class="modal fade" id="novoEvento" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
+                
                 <div class="modal-header">
                     <h5 class="modal-title">Novo Evento</h5>
                     <button type="button" id="fecharModal">
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
+
                 <div class="modal-body">
                     <form id="formEvento">
+
                         <div class="titulo">
                             <label>Título do Evento</label>
                             <input type="text" id="eventoTitulo" required>
                         </div>
+
                         <div class="inicio">
                                 <label>Data e Hora de Início</label>
                                 <input type="datetime-local" id="eventoDataInicio" required>
                         </div>
+                        
                         <div class="fim">
                                 <label>Data e Hora de Fim</label>
                                 <input type="datetime-local" id="eventoDataFim" required>
-                            </div>
-                            <div class="descricao">
+                        </div>
+
+                        <div class="descricao">
                                 <label>Descrição</label>
                                 <textarea id="eventoDescricao"></textarea>
-                            </div>
-                            <div class="setores-evento mt-3">
-                                <label class="mb-2"><b>Visível para quais setores?</b></label>
-                                
-                                <div class="d-flex flex-column gap-2" style="max-height: 150px; overflow-y: auto;">
-                                    <% setores.forEach(function(setor) { %>
-                                        <div class="form-check">
-                                            <input class="form-check-input setor-checkbox" type="checkbox" value="<%= setor.id %>" id="setor_<%= setor.id %>">
-                                            <label class="form-check-label" for="setor_<%= setor.id %>">
-                                                <%= setor.setor %>
-                                            </label>
-                                        </div>
-                                    <% }); %>
-                                </div>
                         </div>
+
+                        <div class="setores-evento mt-3">
+
+                            <label class="mb-2"><b>Visível para quais setores?</b></label>
+                        
+                            <div class="d-flex flex-column gap-2" style="max-height: 150px; overflow-y: auto;">
+                                <% setores.forEach(function(setor) { %>
+                                    <div class="form-check">
+                                        <input class="form-check-input setor-checkbox" type="checkbox" value="<%= setor.id %>" id="setor_<%= setor.id %>">
+                                        <label class="form-check-label" for="setor_<%= setor.id %>">
+                                                <%= setor.setor %>
+                                        </label>        
+                                    </div>
+                                <% }); %>
+                            </div>
+
+                        </div>
+
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -138,32 +148,62 @@
             </div>
         </div>
     </div>
-        <!-- visualizar evento -->
+    
+    <!-- visualizar evento -->
     <div class="modal fade" id="modalVisualizarEvento" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Detalhes do Evento</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" id="fecharModal2" data-bs-dismiss="modal" >
+                        <i class="bi bi-x-lg"></i>
+                    </button>
                 </div>
+
                 <div class="modal-body">
                     <h4 id="vizTitulo" class="mb-3"></h4>
-                    <p><strong><i class="bi bi-clock"></i> Início:</strong> <span id="vizInicio"></span></p>
-                    <p><strong><i class="bi bi-clock-history"></i> Fim:</strong> <span id="vizFim"></span></p>
-                    <p><strong><i class="bi bi-text-paragraph"></i> Descrição:</strong></p>
+
+                    <p>
+                        <strong><i class="bi bi-clock"></i> Início:</strong>
+                        <span id="vizInicio"></span>
+                    </p>
+
+                    <p>
+                        <strong><i class="bi bi-clock-history"></i> Fim:</strong>
+                        <span id="vizFim"></span>
+                    </p>
+
+                    <p>
+                        <strong><i class="bi bi-text-paragraph"></i> Descrição:</strong>
+                    </p>
+
                     <p id="vizDescricao" class="text-muted bg-light p-2 rounded"></p>
+
+                    <p class="mb-0">
+                        <strong>Status:</strong>
+                        <span id="vizStatus" class="badge text-bg-warning">Pendente</span>
+                    </p>
                 </div>
+
                 <div class="modal-footer d-flex justify-content-between">
                     <button type="button" class="btn btn-danger" id="btnExcluirEvento">
                         <i class="bi bi-trash"></i> Excluir
                     </button>
-                    <button type="button" class="btn btn-primary" id="btnEditarEvento">
-                        <i class="bi bi-pencil"></i> Editar
-                    </button>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-success" id="btnConcluirEvento">
+                            <i class="bi bi-check-circle"></i> Marcar como concluído
+                        </button>
+
+                        <button type="button" class="btn btn-primary" id="btnEditarEvento">
+                            <i class="bi bi-pencil"></i> Editar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
 
     <div class="modal-fluxy-overlay" id="modalFluxy" hidden>
         <section class="modal-fluxy" role="dialog" aria-modal="true" aria-labelledby="modalFluxyTitulo" aria-describedby="modalFluxyMensagem">

@@ -20,7 +20,24 @@ document.addEventListener('DOMContentLoaded', function() {
             day: 'Dia'
         },
         
-        events: '/eventos',
+        events: {
+            url: '/eventos',
+            success: function(eventos) {
+                eventos.forEach(evento => {
+                    if (evento.extendedProps.concluido) {
+                        evento.backgroundColor = '#16A34A';
+                        evento.borderColor = '#15803D';
+                        evento.textColor = '#FFFFFF';
+                    } else {
+                        evento.backgroundColor = '#00CED1';
+                        evento.borderColor = '#00B8B8';
+                        evento.textColor = '#0F172A';
+                    }
+                });
+
+                return eventos;
+            }
+        },
 
         dateClick: function(info) {
             eventoEditandoId = null;
@@ -41,48 +58,121 @@ document.addEventListener('DOMContentLoaded', function() {
             modalNovo.show();
         },
 
+        
         eventClick: function(info) {
             const evento = info.event;
-            
+
             document.getElementById('vizTitulo').innerText = evento.title;
             document.getElementById('vizInicio').innerText = evento.start.toLocaleString('pt-BR');
-            document.getElementById('vizFim').innerText = evento.end ? evento.end.toLocaleString('pt-BR') : 'Não definido';
-            document.getElementById('vizDescricao').innerText = evento.extendedProps.descricao || 'Sem descrição.';
+            document.getElementById('vizFim').innerText = evento.end
+                ? evento.end.toLocaleString('pt-BR')
+                : 'Não definido';
+
+            document.getElementById('vizDescricao').innerText =
+                evento.extendedProps.descricao || 'Sem descrição.';
+
+            const status = document.getElementById('vizStatus');
+            const btnConcluir = document.getElementById('btnConcluirEvento');
+
+            function atualizarStatus(concluido) {
+                status.innerText = concluido ? 'Concluído' : 'Pendente';
+
+                status.className = concluido
+                    ? 'badge text-bg-success'
+                    : 'badge text-bg-warning';
+
+                btnConcluir.innerHTML = concluido
+                    ? '<i class="bi bi-arrow-counterclockwise"></i> Desmarcar conclusão'
+                    : '<i class="bi bi-check-circle"></i> Marcar como concluído';
+            }
+
+            atualizarStatus(evento.extendedProps.concluido);
+
+            btnConcluir.onclick = async () => {
+                const novoStatus = !evento.extendedProps.concluido;
+
+                try {
+                    const resposta = await fetch(
+                        `/eventos/${evento.id}/concluir`,
+                        {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                concluido: novoStatus
+                            })
+                        }
+                    );
+
+                    const dados = await resposta.json();
+
+                    if (!resposta.ok || !dados.sucesso) {
+                        alert(dados.mensagem || 'Não foi possível atualizar o status.');
+                        return;
+                    }
+
+                    evento.setExtendedProp('concluido', novoStatus);
+                    atualizarStatus(novoStatus);
+
+                    calendarioVizu.refetchEvents();
+
+                } catch (erro) {
+                    console.error('Erro ao atualizar conclusão:', erro);
+                    alert('Erro ao conectar com o servidor.');
+                }
+            };
 
             document.getElementById('btnExcluirEvento').onclick = async () => {
-                if (confirm("Tem certeza que deseja excluir este evento?")) {
+                if (confirm('Tem certeza que deseja excluir este evento?')) {
                     try {
-                        const resp = await fetch(`/eventos/${evento.id}`, { method: 'DELETE' });
+                        const resp = await fetch(`/eventos/${evento.id}`, {
+                            method: 'DELETE'
+                        });
+
                         const dados = await resp.json();
+
                         if (dados.sucesso) {
                             modalVisualizar.hide();
-                            calendarioVizu.refetchEvents(); 
+                            calendarioVizu.refetchEvents();
                         } else {
                             alert(dados.mensagem);
                         }
-                    } catch (e) { alert("Erro ao excluir."); }
+                    } catch (erro) {
+                        alert('Erro ao excluir.');
+                    }
                 }
             };
 
             document.getElementById('btnEditarEvento').onclick = () => {
                 eventoEditandoId = evento.id;
-                document.querySelector('.modal-title').innerText = "Editar Evento";
+
+                document.querySelector('#novoEvento .modal-title').innerText =
+                    'Editar Evento';
 
                 document.getElementById('eventoTitulo').value = evento.title;
-                document.getElementById('eventoDataInicio').value = evento.start.toISOString().slice(0, 16);
-                document.getElementById('eventoDataFim').value = evento.end ? evento.end.toISOString().slice(0, 16) : '';
-                document.getElementById('eventoDescricao').value = evento.extendedProps.descricao || '';
 
-                document.querySelectorAll('.setor-checkbox').forEach(caixas => {
-                    caixas.checked = evento.extendedProps.setores && evento.extendedProps.setores.includes(caixas.value);
+                document.getElementById('eventoDataInicio').value =
+                    evento.start.toISOString().slice(0, 16);
+
+                document.getElementById('eventoDataFim').value =
+                    evento.end ? evento.end.toISOString().slice(0, 16) : '';
+
+                document.getElementById('eventoDescricao').value =
+                    evento.extendedProps.descricao || '';
+
+                document.querySelectorAll('.setor-checkbox').forEach(caixa => {
+                    caixa.checked = evento.extendedProps.setores &&
+                        evento.extendedProps.setores.includes(caixa.value);
                 });
 
-                modalVisualizar.hide(); 
-                modalNovo.show();      
+                modalVisualizar.hide();
+                modalNovo.show();
             };
 
-            modalVisualizar.show(); 
+            modalVisualizar.show();
         }
+
     });
 
     calendarioVizu.render();
@@ -102,42 +192,62 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('botaoSalvarEvento').addEventListener('click', async () => {
-        const titulo = document.getElementById('eventoTitulo').value;
+        const titulo = document.getElementById('eventoTitulo').value.trim();
         const data_inicio = document.getElementById('eventoDataInicio').value;
         const data_fim = document.getElementById('eventoDataFim').value;
         const descricao = document.getElementById('eventoDescricao').value;
 
         const checkboxesMarcados = document.querySelectorAll('.setor-checkbox:checked');
-    
-        const setoresSelecionados = Array.from(checkboxesMarcados).map(checkbox => checkbox.value);
 
-        if (!titulo || !data_inicio) {
-            alert("Preencha o título e a data.");
+        const setoresSelecionados = Array.from(checkboxesMarcados)
+            .map(checkbox => checkbox.value);
+
+        if (!titulo || !data_inicio || !data_fim) {
+            alert("Preencha o título e as datas.");
             return;
         }
 
+        const editando = eventoEditandoId !== null;
+
+        const url = editando
+            ? `/eventos/${eventoEditandoId}`
+            : '/eventos';
+
+        const metodo = editando ? 'PUT' : 'POST';
+
         try {
-            const resposta = await fetch('/eventos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    titulo, 
-                    data_inicio, 
-                    data_fim, 
-                    descricao, 
-                    setores: setoresSelecionados 
+            const resposta = await fetch(url, {
+                method: metodo,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    titulo,
+                    data_inicio,
+                    data_fim,
+                    descricao,
+                    setores: setoresSelecionados
                 })
             });
 
             const dados = await resposta.json();
 
-            if (dados.sucesso) {
-                modalNovo.hide();
-                calendarioVizu.refetchEvents(); 
-                document.querySelectorAll('.setor-checkbox').forEach(caixas => caixas.checked = false);
-            } else {
-                alert(dados.mensagem);
+            if (!resposta.ok || !dados.sucesso) {
+                alert(dados.mensagem || "Não foi possível salvar o evento.");
+                return;
             }
+
+            modalNovo.hide();
+            calendarioVizu.refetchEvents();
+
+            eventoEditandoId = null;
+
+            document.getElementById('formEvento').reset();
+
+            document.querySelectorAll('.setor-checkbox').forEach(caixa => {
+                caixa.checked = false;
+            });
+
         } catch (erro) {
             console.error("Erro ao salvar evento:", erro);
             alert("Erro ao conectar com o servidor.");
