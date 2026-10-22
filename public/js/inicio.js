@@ -30,7 +30,7 @@ function mostrarMensagem(tipo, titulo, mensagem) {
         sucesso: "bi-check-circle",
         erro: "bi-x-circle",
         aviso: "bi-exclamation-triangle",
-        confirmacao: "bi-question-circle"
+        confirmacao: "bi-question-circle",
     };
 
     modalFluxyIcone.replaceChildren();

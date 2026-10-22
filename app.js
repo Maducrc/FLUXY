@@ -97,7 +97,6 @@ app.get("/empresas/:id/setores", verificarAdm, (req, res) => {
     });
 });
 
-//Cadastro "Postando"
 app.post("/cadastro", async (req, res) =>{
 
     const {
@@ -500,7 +499,6 @@ app.get("/setores-empresa", (req, res) => {
     });
 });
 
-//login lógica com senha hash 
 app.post("/login", async (req, res) => {
 
     const usuario = req.body.usuario;
@@ -566,7 +564,6 @@ app.post("/login", async (req, res) => {
 
 });
 
-//Provisório
 app.get("/dashboard", verificarLogin, (req, res) => {
     if (req.session.usuario.perfil === 'administrador') {
         return res.redirect("/admin");
@@ -649,7 +646,6 @@ res.render("setor", {
 
 });
 
-//Provisório
 app.get("/usuario-logado", (req, res) => {
 
     if (!req.session.usuario) {
@@ -909,6 +905,70 @@ app.post("/eventos", verificarLogin, (req, res) => {
         } else {
             res.json({ sucesso: true });
         }
+    });
+});
+
+app.get("/agenda-geral", verificarLogin, (req, res) => {
+    const empresaId = req.session.usuario.empresa_id;
+    const setorId = req.session.usuario.setor_id;
+    const usuarioId = req.session.usuario.id;
+    const perfil = req.session.usuario.perfil;
+
+    let sql;
+    let params = [];
+
+    const campos = `
+        SELECT
+            e.id,
+            e.titulo AS title, 
+            DATE_FORMAT(e.data_inicio, '%Y-%m-%dT%H:%i:%s') AS start,
+            DATE_FORMAT(e.data_fim, '%Y-%m-%dT%H:%i:%s') AS end
+        FROM eventos e 
+        WHERE e.empresa_id = ?
+        AND e.data_inicio >= NOW()
+    `;
+
+    if(perfil === "admin_empresa") {
+        sql = `
+            ${campos}
+            ORDER BY e.data_inicio ASC 
+            LIMIT 3
+        `;
+
+        params = [empresaID];
+    }
+
+    else {
+        sql = `
+            ${campos}
+            AND (
+                e.usuario_id = ?
+                OR e.id IN (
+                    SELECT evento_id
+                    FROM eventos_setores
+                    WHERE setor_id = ?
+                )
+                OR e.id NOT IN (
+                    SELECT evento_id
+                    FROM eventos_setores
+                )
+            )
+            ORDER BY e.data_inicio ASC
+            LIMIT 3 
+        `;
+
+        params = [empresaId, usuarioId, setorId];
+    }
+
+    db.query(sql, params, (erro, resultados) => {
+        if(erro) {
+            console.error("Erro ao buscar agenda geral:", erro);
+            return res.status(500).json({
+                erro: "Erro ao carregar a agenda geral."
+            });
+        }
+
+        res.json(resultados);
     });
 });
 

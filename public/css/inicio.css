@@ -149,7 +149,7 @@
 
 .card-lateral h2 {
     color: var(--ciano);
-    font-size: 11px;
+    font-size: 14px;
     line-height: 1.4;
     margin: 0;
     overflow-wrap: break-word;
@@ -492,6 +492,83 @@
     display: flex;
     align-items: center;
     gap: 4px;
+}
+
+/*AGENDA GERAL*/
+#listaAgendaGeral {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.agenda-evento {
+    max-height : 60px !important;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #202329;
+}
+
+.agenda-evento:hover {
+    background: #272B32;
+}
+
+/* Data */
+.agenda-evento-data {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 54px;
+    min-height: 50px;
+    gap: 2px;
+    border-radius: 8px;
+    background: rgba(0, 206, 209, 0.12);
+    color: #67E8F9;
+}
+
+.agenda-evento-data strong {
+    font-size: 18px;
+    line-height: 1.2;
+}
+
+.agenda-evento-data span {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Título e horário */
+.agenda-evento-detalhes {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
+    flex: 1;
+}
+
+.agenda-evento-titulo {
+    color: #F8FAFC;
+    font-size: 13px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.agenda-evento-horario {
+    color: #94A3B8;
+    font-size: 12px;
+}
+
+.agenda-vazia,
+.agenda-carregando {
+    color: #94A3B8;
+    font-size: 13px;
+    padding: 8px 0;
 }
 
 @media (max-width: 1100px) {
