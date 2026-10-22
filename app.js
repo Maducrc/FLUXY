@@ -834,13 +834,20 @@ app.get("/eventos", verificarLogin, (req, res) => {
     
     let sql;
     let params = [];
-    
+
     if (perfil === 'admin_empresa') {
-        sql = "SELECT id, titulo AS title, REPLACE(data_inicio, ' ', 'T') AS start, REPLACE(data_fim, ' ', 'T') AS end, descricao AS description FROM eventos WHERE empresa_id = ?";
+        sql = `
+            SELECT e.id, e.titulo AS title, REPLACE(e.data_inicio, ' ', 'T') AS start, REPLACE(e.data_fim, ' ', 'T') AS end, 
+            e.descricao, e.usuario_id,
+            (SELECT GROUP_CONCAT(setor_id) FROM eventos_setores WHERE evento_id = e.id) as setores_ids
+            FROM eventos e WHERE e.empresa_id = ?
+        `;
         params = [empresaId];
     } else {
         sql = `
-            SELECT DISTINCT e.id, e.titulo AS title, REPLACE(e.data_inicio, ' ', 'T') AS start, REPLACE(e.data_fim, ' ', 'T') AS end, e.descricao AS description 
+            SELECT DISTINCT e.id, e.titulo AS title, REPLACE(e.data_inicio, ' ', 'T') AS start, REPLACE(e.data_fim, ' ', 'T') AS end, 
+            e.descricao, e.usuario_id,
+            (SELECT GROUP_CONCAT(setor_id) FROM eventos_setores WHERE evento_id = e.id) as setores_ids
             FROM eventos e
             WHERE e.empresa_id = ? 
             AND (
@@ -853,11 +860,21 @@ app.get("/eventos", verificarLogin, (req, res) => {
     }
     
     db.query(sql, params, (erro, resultados) => {
-        if (erro) {
-            console.error("Erro ao buscar eventos:", erro);
-            return res.status(500).json({ erro: "Erro ao buscar eventos" });
-        }
-        res.json(resultados);
+        if (erro) return res.status(500).json({ erro: "Erro ao buscar eventos" });
+
+        const eventosFormatados = resultados.map(evento => ({
+            id: evento.id,
+            title: evento.title,
+            start: evento.start,
+            end: evento.end,
+            extendedProps: {
+                descricao: evento.descricao,
+                usuario_id: evento.usuario_id,
+                setores: evento.setores_ids ? evento.setores_ids.split(',') : []
+            }
+        }));
+        
+        res.json(eventosFormatados);
     });
 });
 
@@ -905,70 +922,6 @@ app.post("/eventos", verificarLogin, (req, res) => {
         } else {
             res.json({ sucesso: true });
         }
-    });
-});
-
-app.get("/agenda-geral", verificarLogin, (req, res) => {
-    const empresaId = req.session.usuario.empresa_id;
-    const setorId = req.session.usuario.setor_id;
-    const usuarioId = req.session.usuario.id;
-    const perfil = req.session.usuario.perfil;
-
-    let sql;
-    let params = [];
-
-    const campos = `
-        SELECT
-            e.id,
-            e.titulo AS title, 
-            DATE_FORMAT(e.data_inicio, '%Y-%m-%dT%H:%i:%s') AS start,
-            DATE_FORMAT(e.data_fim, '%Y-%m-%dT%H:%i:%s') AS end
-        FROM eventos e 
-        WHERE e.empresa_id = ?
-        AND e.data_inicio >= NOW()
-    `;
-
-    if(perfil === "admin_empresa") {
-        sql = `
-            ${campos}
-            ORDER BY e.data_inicio ASC 
-            LIMIT 3
-        `;
-
-        params = [empresaID];
-    }
-
-    else {
-        sql = `
-            ${campos}
-            AND (
-                e.usuario_id = ?
-                OR e.id IN (
-                    SELECT evento_id
-                    FROM eventos_setores
-                    WHERE setor_id = ?
-                )
-                OR e.id NOT IN (
-                    SELECT evento_id
-                    FROM eventos_setores
-                )
-            )
-            ORDER BY e.data_inicio ASC
-            LIMIT 3 
-        `;
-
-        params = [empresaId, usuarioId, setorId];
-    }
-
-    db.query(sql, params, (erro, resultados) => {
-        if(erro) {
-            console.error("Erro ao buscar agenda geral:", erro);
-            return res.status(500).json({
-                erro: "Erro ao carregar a agenda geral."
-            });
-        }
-
-        res.json(resultados);
     });
 });
 

@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const calendario = document.getElementById('calendario');
-    const evento = document.getElementById('novoEvento');
-    const modal = new bootstrap.Modal(evento);
+    const modalNovo = new bootstrap.Modal(document.getElementById('novoEvento'));
+    const modalVisualizar = new bootstrap.Modal(document.getElementById('modalVisualizarEvento'));
+
+    let eventoEditandoId = null;
 
     const calendarioVizu = new FullCalendar.Calendar(calendario, {
         initialView: 'dayGridMonth', 
@@ -21,6 +23,12 @@ document.addEventListener('DOMContentLoaded', function() {
         events: '/eventos',
 
         dateClick: function(info) {
+            eventoEditandoId = null;
+
+            document.getElementById('formEvento').reset();
+            document.querySelectorAll('.setor-checkbox').forEach(cb => cb.checked = false);
+            document.querySelector('.modal-title').innerText = "Novo Evento"; 
+
             const dataInicioFormatada = info.dateStr + 'T09:00'; 
             const dataFimFormatada = info.dateStr + 'T10:00'; 
 
@@ -30,14 +38,57 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('eventoTitulo').value = '';
             document.getElementById('eventoDescricao').value = '';
             
-            modal.show();
+            modalNovo.show();
+        },
+
+        eventClick: function(info) {
+            const evento = info.event;
+            
+            document.getElementById('vizTitulo').innerText = evento.title;
+            document.getElementById('vizInicio').innerText = evento.start.toLocaleString('pt-BR');
+            document.getElementById('vizFim').innerText = evento.end ? evento.end.toLocaleString('pt-BR') : 'Não definido';
+            document.getElementById('vizDescricao').innerText = evento.extendedProps.descricao || 'Sem descrição.';
+
+            document.getElementById('btnExcluirEvento').onclick = async () => {
+                if (confirm("Tem certeza que deseja excluir este evento?")) {
+                    try {
+                        const resp = await fetch(`/eventos/${evento.id}`, { method: 'DELETE' });
+                        const dados = await resp.json();
+                        if (dados.sucesso) {
+                            modalVisualizar.hide();
+                            calendarioVizu.refetchEvents(); 
+                        } else {
+                            alert(dados.mensagem);
+                        }
+                    } catch (e) { alert("Erro ao excluir."); }
+                }
+            };
+
+            document.getElementById('btnEditarEvento').onclick = () => {
+                eventoEditandoId = evento.id;
+                document.querySelector('.modal-title').innerText = "Editar Evento";
+
+                document.getElementById('eventoTitulo').value = evento.title;
+                document.getElementById('eventoDataInicio').value = evento.start.toISOString().slice(0, 16);
+                document.getElementById('eventoDataFim').value = evento.end ? evento.end.toISOString().slice(0, 16) : '';
+                document.getElementById('eventoDescricao').value = evento.extendedProps.descricao || '';
+
+                document.querySelectorAll('.setor-checkbox').forEach(caixas => {
+                    caixas.checked = evento.extendedProps.setores && evento.extendedProps.setores.includes(caixas.value);
+                });
+
+                modalVisualizar.hide(); 
+                modalNovo.show();      
+            };
+
+            modalVisualizar.show(); 
         }
     });
 
     calendarioVizu.render();
 
     document.getElementById('fecharModal').addEventListener('click', function() {
-        modal.hide();
+        modalNovo.hide();
     });
 
     const botaoLimpar = document.getElementById('botaoLimpar');
@@ -81,9 +132,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const dados = await resposta.json();
 
             if (dados.sucesso) {
-                modal.hide();
+                modalNovo.hide();
                 calendarioVizu.refetchEvents(); 
-                document.querySelectorAll('.setor-checkbox').forEach(cb => cb.checked = false);
+                document.querySelectorAll('.setor-checkbox').forEach(caixas => caixas.checked = false);
             } else {
                 alert(dados.mensagem);
             }
