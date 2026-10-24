@@ -51,6 +51,7 @@ CREATE TABLE eventos (
     data_inicio DATETIME NOT NULL,
     data_fim DATETIME NOT NULL,
     descricao TEXT,
+    concluido BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
     FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );

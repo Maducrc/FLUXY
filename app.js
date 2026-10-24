@@ -671,11 +671,14 @@ app.get("/cadastro-empresa", verificarAdm, (req, res) => {
 
 app.post("/cadastro-empresa", verificarAdm, (req, res) => {
 
-    const { empresa, setores } = req.body;
+    const { empresa } = req.body;
 
+    if (!empresa) {
+        return res.status(400).json({ sucesso: false, mensagem: "Nome da empresa é obrigatório." });
+    }
+    
     console.log("POST RECEBIDO!");
     console.log("Empresa:", empresa);
-    console.log("Setores:", setores);
 
     const sql = "INSERT INTO empresas (empresa) VALUES (?)";
 
@@ -694,48 +697,69 @@ app.post("/cadastro-empresa", verificarAdm, (req, res) => {
         console.log("Empresa cadastrada!");
         console.log("ID da empresa:", resultado.insertId);
 
-       //Setores
-       const empresaId = resultado.insertId;
-       
-       const sqlSetor = `
-        INSERT INTO setores (setor, empresa_id)
-        VALUES (?, ?)
-       `;
-
-       let setoresCadastrados = 0; 
-
-       setores.forEach((nomeSetor) => {
-        
-            db.query(
-                sqlSetor, 
-                [nomeSetor, empresaId],
-                (erroSetor) => {
-
-                    if(erroSetor) {
-                        console.error("Erro ao cadastrar setor", erroSetor);
-                        return;
-                    }
-
-                    setoresCadastrados++;
-
-                    console.log(
-                        `Setor Cadastrado: ${nomeSetor}`
-                    );
-
-                    if(setoresCadastrados === setores.length) {
-                        res.json({
-                            sucesso: true, 
-                            mensagem: "Empresa e setores cadastrados com sucesso!",
-                            empresa_id: empresaId
-                        });
-                    }
-
-                }
-            );
-       });
+        res.json({ sucesso: true, mensagem: "Empresa cadastrada com sucesso!" });
 
     });
 
+});
+
+app.get("/empresas/:id/detalhes", verificarAdm, (req, res) => {
+    const empresaId = req.params.id;
+    
+    db.query("SELECT empresa FROM empresas WHERE id = ?", [empresaId], (erro, empresa) => {
+        if (erro || empresa.length === 0) return res.status(404).json({ erro: "Empresa não encontrada" });
+        
+        db.query("SELECT id, setor FROM setores WHERE empresa_id = ?", [empresaId], (erroSetores, setores) => {
+            db.query("SELECT id, nome, perfil FROM usuarios WHERE empresa_id = ?", [empresaId], (erroUsers, usuarios) => {
+                res.json({ 
+                    empresa: empresa[0].empresa, 
+                    setores: setores, 
+                    usuarios: usuarios 
+                });
+            });
+        });
+    });
+});
+
+app.put("/empresas/:id", verificarAdm, (req, res) => {
+    const { empresa } = req.body;
+    db.query("UPDATE empresas SET empresa = ? WHERE id = ?", [empresa, req.params.id], (erro) => {
+        if (erro) return res.status(500).json({ sucesso: false, mensagem: erro.message });
+        res.json({ sucesso: true, mensagem: "Nome atualizado!" });
+    });
+});
+
+app.delete("/empresas/:id", verificarAdm, (req, res) => {
+    db.query("DELETE FROM empresas WHERE id = ?", [req.params.id], (erro) => {
+        if (erro) return res.status(500).json({ sucesso: false, mensagem: "Erro ao excluir. Verifique dependências." });
+        res.json({ sucesso: true, mensagem: "Empresa excluída!" });
+    });
+});
+
+app.get("/cadastro-setor", verificarAdm, (req, res) => {
+    const sqlEmpresas = "SELECT * FROM empresas ORDER BY empresa ASC";
+    const sqlSetores = `
+        SELECT s.id, s.setor, e.empresa 
+        FROM setores s 
+        JOIN empresas e ON s.empresa_id = e.id 
+        ORDER BY e.empresa ASC, s.setor ASC
+    `;
+    
+    db.query(sqlEmpresas, (erroE, empresas) => {
+        db.query(sqlSetores, (erroS, setores) => {
+            res.render("cadastro-setor", { usuario: req.session.usuario, empresas, setores });
+        });
+    });
+});
+
+app.post("/cadastro-setor", verificarAdm, (req, res) => {
+    const { empresa_id, setor } = req.body;
+    if (!empresa_id || !setor) return res.status(400).json({ sucesso: false, mensagem: "Preencha todos os campos." });
+    
+    db.query("INSERT INTO setores (setor, empresa_id) VALUES (?, ?)", [setor, empresa_id], (erro) => {
+        if (erro) return res.status(500).json({ sucesso: false, mensagem: erro.message });
+        res.json({ sucesso: true, mensagem: "Setor cadastrado!" });
+    });
 });
 
 app.get("/admin", verificarAdm, (req, res) => {
