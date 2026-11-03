@@ -830,7 +830,7 @@ app.get("/cadastro-empresa", verificarAdm, (req, res) => {
     res.render("cadastro-empresa");
 });
 
-app.post("/cadastro-empresa", verificarAdm, (req, res) => {
+app.post("/cadastro-empresa", verificarAdm, async (req, res) => {
 
     const { empresa, setores } = req.body;
 
@@ -838,62 +838,120 @@ app.post("/cadastro-empresa", verificarAdm, (req, res) => {
     console.log("Empresa:", empresa);
     console.log("Setores:", setores);
 
-    const sql = "INSERT INTO empresas (empresa) VALUES (?)";
+    // Validação dos dados
+    if (!empresa || !empresa.trim()) {
+        return res.status(400).json({
+            sucesso: false,
+            mensagem: "Informe o nome da empresa."
+        });
+    }
 
-    db.query(sql, [empresa], (erro, resultado) => {
+    if (setores !== undefined && !Array.isArray(setores)) {
+        return res.status(400).json({
+            sucesso: false,
+            mensagem: "Os setores enviados são inválidos."
+        });
+    }
 
-        if (erro) {
-            console.error("ERRO AO CADASTRAR EMPRESA:");
-            console.error(erro);
+    // Remove espaços e valores vazios
+    const listaSetores = (setores || [])
+        .map(nome => String(nome).trim())
+        .filter(nome => nome !== "");
+
+    // Evita setores repetidos na mesma requisição
+    const setoresUnicos = [...new Set(listaSetores)];
+
+    // Função para executar consultas com Promise
+    const consultar = (sql, parametros = []) => {
+        return new Promise((resolve, reject) => {
+            db.query(sql, parametros, (erro, resultado) => {
+                if (erro) return reject(erro);
+                resolve(resultado);
+            });
+        });
+    };
+
+    // Inicia a transação
+    db.beginTransaction(async (erroTransacao) => {
+
+        if (erroTransacao) {
+            console.error("Erro ao iniciar transação:", erroTransacao);
 
             return res.status(500).json({
                 sucesso: false,
-                mensagem: erro.message
+                mensagem: "Não foi possível iniciar o cadastro."
             });
         }
 
-        console.log("Empresa cadastrada!");
-        console.log("ID da empresa:", resultado.insertId);
+        try {
 
-       //Setores
-       const empresaId = resultado.insertId;
-       
-       const sqlSetor = `
-        INSERT INTO setores (setor, empresa_id)
-        VALUES (?, ?)
-       `;
-
-       let setoresCadastrados = 0; 
-
-       setores.forEach((nomeSetor) => {
-        
-            db.query(
-                sqlSetor, 
-                [nomeSetor, empresaId],
-                (erroSetor) => {
-
-                    if(erroSetor) {
-                        console.error("Erro ao cadastrar setor", erroSetor);
-                        return;
-                    }
-
-                    setoresCadastrados++;
-
-                    console.log(
-                        `Setor Cadastrado: ${nomeSetor}`
-                    );
-
-                    if(setoresCadastrados === setores.length) {
-                        res.json({
-                            sucesso: true, 
-                            mensagem: "Empresa e setores cadastrados com sucesso!",
-                            empresa_id: empresaId
-                        });
-                    }
-
-                }
+            // Cadastra a empresa
+            const resultadoEmpresa = await consultar(
+                "INSERT INTO empresas (empresa) VALUES (?)",
+                [empresa.trim()]
             );
-       });
+
+            const empresaId = resultadoEmpresa.insertId;
+
+            console.log("Empresa cadastrada! ID:", empresaId);
+
+            // Cadastra os setores vinculados à empresa
+            for (const nomeSetor of setoresUnicos) {
+
+                await consultar(
+                    `INSERT INTO setores (setor, empresa_id)
+                     VALUES (?, ?)`,
+                    [nomeSetor, empresaId]
+                );
+
+                console.log("Setor cadastrado:", nomeSetor);
+            }
+
+            // Confirma todas as operações
+            db.commit((erroCommit) => {
+
+                if (erroCommit) {
+                    return db.rollback(() => {
+                        console.error("Erro ao confirmar cadastro:", erroCommit);
+
+                        res.status(500).json({
+                            sucesso: false,
+                            mensagem: "Não foi possível concluir o cadastro."
+                        });
+                    });
+                }
+
+                console.log("Cadastro concluído com sucesso!");
+
+                return res.json({
+                    sucesso: true,
+                    mensagem: "Empresa e setores cadastrados com sucesso!",
+                    empresa_id: empresaId
+                });
+
+            });
+
+        } catch (erro) {
+
+            db.rollback(() => {
+
+                console.error("Erro ao cadastrar empresa ou setores:", erro);
+
+                if (erro.code === "ER_DUP_ENTRY") {
+                    return res.status(409).json({
+                        sucesso: false,
+                        mensagem: "A empresa ou um dos setores já está cadastrado."
+                    });
+                }
+
+                return res.status(500).json({
+                    sucesso: false,
+                    mensagem: "Erro ao cadastrar empresa e setores."
+                });
+
+            });
+
+        }
 
     });
 

@@ -1,16 +1,10 @@
-<!DOCTYPE html>
-<html lang="pt-br">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Gerenciar Setores | Fluxy</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/css/admin.css">
     <link rel="stylesheet" href="/css/cadastro-setor.css">
-</head>
+    <link rel="stylesheet" href="/css/modal.css">
 
-<body>
     <div class="admin-layout">
 
         <aside class="admin-sidebar">
@@ -84,9 +78,23 @@
 
         </main>
 
+    <div class="modal-fluxy-overlay" id="modalFluxy" hidden>
+        <section class="modal-fluxy" role="dialog" aria-modal="true" aria-labelledby="modalFluxyTitulo" aria-describedby="modalFluxyMensagem">
+            <div class="modal-fluxy-icone" id="modalFluxyIcone">
+                <i class="bi bi-check-circle"></i>
+            </div>
+
+            <h2 id="modalFluxyTitulo">Tudo certo!</h2>
+            <p id="modalFluxyMensagem">A ação foi concluída com sucesso.</p>
+
+            <div class="modal-fluxy-acoes">
+                <button type="button" id="modalFluxyCancelar" class="modal-fluxy-cancelar" hidden>Cancelar</button>
+                <button type="button" id="modalFluxyConfirmar" class="modal-fluxy-confirmar">Ok</button>
+            </div>
+        </section>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+
     <script src="/js/cadastro-setor.js"></script>
-</body>
-</html>
+    <script src="/js/logout.js"></script>
