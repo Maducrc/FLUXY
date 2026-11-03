@@ -1,0 +1,21 @@
+@import url("variaveis.css");
+
+:root {
+    --fluxy-primary: #00CED1;
+    --fluxy-secondary: #67E8F9;
+    --fluxy-hoover: #b9f7ff;
+    --fluxy-dark: #191B1F;
+    --fluxy-light: #000;
+    --fluxy-muted: #94A3B8;
+    --fluxy-border: #E2E8F0;
+}
+
+.btn-primary {
+    background-color: var(--turquesa);
+    border: var(--turquesa);
+}
+
+.btn-primary:hover {
+    background-color: #009396;
+    border: #009396;
+}

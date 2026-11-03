@@ -97,6 +97,167 @@ app.get("/empresas/:id/setores", verificarAdm, (req, res) => {
     });
 });
 
+app.get("/cadastro-setor", verificarAdm, (req, res) => {
+    db.query("SELECT id, empresa FROM empresas ORDER BY empresa", (erro, empresas) => {
+        if (erro) {
+            console.error("Erro ao buscar empresas:", erro);
+
+            return res.status(500).send("Erro ao carregar empresas.");
+        }
+
+        res.render("cadastro-setor", { empresas });
+    });
+});
+
+app.post("/cadastro-setor", verificarAdm, (req, res) => {
+    const { empresa_id, setor } = req.body;
+    if (!empresa_id || !setor) return res.status(400).json({ sucesso: false, mensagem: "Preencha todos os campos." });
+    
+    db.query("INSERT INTO setores (setor, empresa_id) VALUES (?, ?)", [setor, empresa_id], (erro) => {
+        if (erro) return res.status(500).json({ sucesso: false, mensagem: erro.message });
+        res.json({ sucesso: true, mensagem: "Setor cadastrado!" });
+    });
+});
+
+app.delete("/empresas/:id", verificarAdm, async (req, res) => {
+    const empresaId = Number(req.params.id);
+
+    if(!Number.isInteger(empresaId) || empresaId <= 0) {
+        return res.status(400).json({
+            sucesso: false,
+            mensagem: "ID da empresa inválido."
+        });
+    }
+
+    const consultar = (sql, parametros = []) => {
+        return new Promise((resolve, reject) => {
+            db.query(sql, parametros, (erro, resultado) => {
+                if(erro) return reject(erro);
+                resolve(resultado);
+            });
+        });
+    };
+
+    const executar = (sql, parametros = []) => {
+        return new Promise((resolve, reject) => {
+            db.query(sql, parametros, (erro, resultado) => {
+                if(erro) return reject(erro);
+                resolve(resultado);
+            });
+        });
+    };
+
+    db.beginTransaction(async (erroTransacao) => {
+        if(erroTransacao) {
+            console.error("Erro ao iniciar transação:", erroTransacao);
+
+            return res.status(500).json ({
+                sucesso: false,
+                mensagem: "Não foi possível iniciar exclusão."
+            });
+        }
+
+        try {
+            const empresas = await consultar (
+                "SELECT id FROM empresas WHERE id = ?",
+                [empresaId]
+            )
+        
+
+            if(empresas.length === 0) {
+                throw Object.assign(
+                    new Error("Empresa não encontrada."),
+                    {status:404}
+                );
+            }
+
+            const administradores = await consultar (
+                `
+                    SELECT id FROM usuarios 
+                    WHERE empresa_id = ? 
+                    AND perfil = 'administrador'          
+                `,
+                [empresaId]
+            );
+
+            if(administradores.length > 0) {
+                throw Object.assign (
+                    new Error (
+                        "Esta empresa possui uma conta de administrador global associada."
+                    ),
+                    {status: 409}
+                );
+            }
+
+            await executar (
+                "DELETE FROM eventos WHERE empresa_id = ?",
+                [empresaId]
+            );
+
+            await executar (
+                `DELETE FROM publicacoes
+                WHERE usuario_id IN (
+                    SELECT id FROM usuarios 
+                    WHERE empresa_id = ?    
+                )`,
+                [empresaId]
+            );
+
+            await executar (
+                "DELETE FROM usuarios WHERE empresa_id = ?",
+                [empresaId]
+            );
+
+            await executar (
+                "DELETE FROM setores WHERE empresa_id = ?",
+                [empresaId]
+            );
+
+            await executar (
+                "DELETE FROM empresas WHERE id = ?",
+                [empresaId]
+            );
+
+            db.commit((erroCommit) => {
+
+                if(erroCommit) {
+                    return db.rollback(() => {
+                        console.error (
+                            "Erro ao confirmar exclusão:",
+                            erroCommit
+                        );
+
+                        res.status(500).json({
+                            sucesso: false, 
+                            mensagem: "Não foi possível concluir a exclusão."
+                        });
+                    });
+                }
+
+                res.json({
+                    sucesso: true,
+                    mensagem: "Empresa excluída com sucesso!"
+                });
+            });
+        }
+
+        catch (erro) {
+            return db.rollback(() => {
+                console.error("Erro ao excluir empresa:", erro);
+
+                res.status(erro.status || 500).json({
+                    sucesso: false,
+                    mensagem: erro.status
+                        ? erro.menssage
+                        : "Erro ao excluir empresa e seus registros."
+                });
+            });
+        }
+
+    });
+
+});
+
 app.post("/cadastro", async (req, res) =>{
 
     const {
@@ -671,14 +832,11 @@ app.get("/cadastro-empresa", verificarAdm, (req, res) => {
 
 app.post("/cadastro-empresa", verificarAdm, (req, res) => {
 
-    const { empresa } = req.body;
+    const { empresa, setores } = req.body;
 
-    if (!empresa) {
-        return res.status(400).json({ sucesso: false, mensagem: "Nome da empresa é obrigatório." });
-    }
-    
     console.log("POST RECEBIDO!");
     console.log("Empresa:", empresa);
+    console.log("Setores:", setores);
 
     const sql = "INSERT INTO empresas (empresa) VALUES (?)";
 
@@ -697,69 +855,48 @@ app.post("/cadastro-empresa", verificarAdm, (req, res) => {
         console.log("Empresa cadastrada!");
         console.log("ID da empresa:", resultado.insertId);
 
-        res.json({ sucesso: true, mensagem: "Empresa cadastrada com sucesso!" });
+       //Setores
+       const empresaId = resultado.insertId;
+       
+       const sqlSetor = `
+        INSERT INTO setores (setor, empresa_id)
+        VALUES (?, ?)
+       `;
 
-    });
+       let setoresCadastrados = 0; 
 
-});
-
-app.get("/empresas/:id/detalhes", verificarAdm, (req, res) => {
-    const empresaId = req.params.id;
-    
-    db.query("SELECT empresa FROM empresas WHERE id = ?", [empresaId], (erro, empresa) => {
-        if (erro || empresa.length === 0) return res.status(404).json({ erro: "Empresa não encontrada" });
+       setores.forEach((nomeSetor) => {
         
-        db.query("SELECT id, setor FROM setores WHERE empresa_id = ?", [empresaId], (erroSetores, setores) => {
-            db.query("SELECT id, nome, perfil FROM usuarios WHERE empresa_id = ?", [empresaId], (erroUsers, usuarios) => {
-                res.json({ 
-                    empresa: empresa[0].empresa, 
-                    setores: setores, 
-                    usuarios: usuarios 
-                });
-            });
-        });
-    });
-});
+            db.query(
+                sqlSetor, 
+                [nomeSetor, empresaId],
+                (erroSetor) => {
 
-app.put("/empresas/:id", verificarAdm, (req, res) => {
-    const { empresa } = req.body;
-    db.query("UPDATE empresas SET empresa = ? WHERE id = ?", [empresa, req.params.id], (erro) => {
-        if (erro) return res.status(500).json({ sucesso: false, mensagem: erro.message });
-        res.json({ sucesso: true, mensagem: "Nome atualizado!" });
-    });
-});
+                    if(erroSetor) {
+                        console.error("Erro ao cadastrar setor", erroSetor);
+                        return;
+                    }
 
-app.delete("/empresas/:id", verificarAdm, (req, res) => {
-    db.query("DELETE FROM empresas WHERE id = ?", [req.params.id], (erro) => {
-        if (erro) return res.status(500).json({ sucesso: false, mensagem: "Erro ao excluir. Verifique dependências." });
-        res.json({ sucesso: true, mensagem: "Empresa excluída!" });
-    });
-});
+                    setoresCadastrados++;
 
-app.get("/cadastro-setor", verificarAdm, (req, res) => {
-    const sqlEmpresas = "SELECT * FROM empresas ORDER BY empresa ASC";
-    const sqlSetores = `
-        SELECT s.id, s.setor, e.empresa 
-        FROM setores s 
-        JOIN empresas e ON s.empresa_id = e.id 
-        ORDER BY e.empresa ASC, s.setor ASC
-    `;
-    
-    db.query(sqlEmpresas, (erroE, empresas) => {
-        db.query(sqlSetores, (erroS, setores) => {
-            res.render("cadastro-setor", { usuario: req.session.usuario, empresas, setores });
-        });
-    });
-});
+                    console.log(
+                        `Setor Cadastrado: ${nomeSetor}`
+                    );
 
-app.post("/cadastro-setor", verificarAdm, (req, res) => {
-    const { empresa_id, setor } = req.body;
-    if (!empresa_id || !setor) return res.status(400).json({ sucesso: false, mensagem: "Preencha todos os campos." });
-    
-    db.query("INSERT INTO setores (setor, empresa_id) VALUES (?, ?)", [setor, empresa_id], (erro) => {
-        if (erro) return res.status(500).json({ sucesso: false, mensagem: erro.message });
-        res.json({ sucesso: true, mensagem: "Setor cadastrado!" });
+                    if(setoresCadastrados === setores.length) {
+                        res.json({
+                            sucesso: true, 
+                            mensagem: "Empresa e setores cadastrados com sucesso!",
+                            empresa_id: empresaId
+                        });
+                    }
+
+                }
+            );
+       });
+
     });
+
 });
 
 app.get("/admin", verificarAdm, (req, res) => {
@@ -942,7 +1079,6 @@ app.get("/eventos", verificarLogin, (req, res) => {
         res.json(eventosFormatados);
     });
 });
-
 
 app.post("/eventos", verificarLogin, (req, res) => {
     const { titulo, data_inicio, data_fim, descricao, setores } = req.body;
@@ -1150,126 +1286,6 @@ app.get("/agenda-geral", verificarLogin, (req, res) => {
         }));
 
         res.json(eventosFormatados);
-    });
-});
-
-app.post("/pendencias", verificarLogin, (req, res) => {
-    const {
-        titulo,
-        descricao,
-        prazo,
-        impacto,
-        tarefas_bloqueadas
-    } = req.body;
-
-    const usuarioId = req.session.usuario.id;
-    const empresaId = req.session.usuario.empresa_id;
-    const setorId = req.session.usuario.setor_id;
-
-    const notaImpacto = Number(impacto);
-    const quantidadeBloqueada = Number(tarefas_bloqueadas);
-
-    if (
-        typeof titulo !== "string" ||
-        !titulo.trim() ||
-        titulo.trim().length > 150 ||
-        typeof prazo !== "string" ||
-        !/^\d{4}-\d{2}-\d{2}$/.test(prazo) ||
-        !Number.isInteger(notaImpacto) ||
-        notaImpacto < 0 ||
-        notaImpacto > 10 ||
-        !Number.isInteger(quantidadeBloqueada) ||
-        quantidadeBloqueada < 0
-    ) {
-        return res.status(400).json({
-            sucesso: false,
-            mensagem: "Verifique os dados informados."
-        });
-    }
-
-    const sql = `
-        INSERT INTO pendencias
-        (
-            titulo,
-            descricao,
-            prazo,
-            impacto,
-            tarefas_bloqueadas,
-            empresa_id,
-            setor_id,
-            usuario_id
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    db.query(
-        sql,
-        [
-            titulo.trim(),
-            typeof descricao === "string" ? descricao.trim() : "",
-            prazo,
-            notaImpacto,
-            quantidadeBloqueada,
-            empresaId,
-            setorId,
-            usuarioId
-        ],
-        (erro, resultado) => {
-            if (erro) {
-                console.error("Erro ao cadastrar pendência:", erro);
-
-                return res.status(500).json({
-                    sucesso: false,
-                    mensagem: "Erro ao cadastrar pendência."
-                });
-            }
-
-            res.status(201).json({
-                sucesso: true,
-                mensagem: "Pendência cadastrada com sucesso!",
-                id: resultado.insertId
-            });
-        }
-    );
-});
-
-app.get("/pendencias", verificarLogin, (req, res) => {
-    const empresaId = req.session.usuario.empresa_id;
-
-    const sql = `
-        SELECT
-            p.id,
-            p.titulo,
-            p.descricao,
-            p.prazo,
-            p.impacto,
-            p.tarefas_bloqueadas,
-            p.status,
-            p.criado_em,
-            s.nome AS nome_setor,
-            u.nome AS nome_usuario
-        FROM pendencias p
-        INNER JOIN setores s ON p.setor_id = s.id
-        INNER JOIN usuarios u ON p.usuario_id = u.id
-        WHERE p.empresa_id = ?
-          AND p.status = 'pendente'
-        ORDER BY p.prazo ASC, p.impacto DESC
-    `;
-
-    db.query(sql, [empresaId], (erro, resultados) => {
-        if (erro) {
-            console.error("Erro ao buscar pendências:", erro);
-
-            return res.status(500).json({
-                sucesso: false,
-                mensagem: "Erro ao buscar pendências."
-            });
-        }
-
-        res.json({
-            sucesso: true,
-            pendencias: resultados
-        });
     });
 });
 

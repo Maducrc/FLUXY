@@ -27,6 +27,7 @@ body {
 /* ===== MENU LATERAL ===== */
 
 .admin-sidebar {
+    display: block;
     width: 250px;
     min-height: 100vh;
     padding: 24px 16px;

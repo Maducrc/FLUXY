@@ -1,18 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Gerenciar Setores | Fluxy</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/cadastro-setor.css">
 </head>
+
 <body>
     <div class="admin-layout">
+
         <aside class="admin-sidebar">
+
             <div class="admin-brand"><div class="logo"><img src="/img/logo.png" alt="Fluxy"></div>
-        </div>
+
+            </div>
+            
             <p class="admin-menu-label">Menu principal</p>
+
             <nav class="admin-nav">
                 <a href="/admin">
                     <span> Visão geral</span>
@@ -28,9 +36,11 @@
                     <span>Sair</span>
                 </a>
             </nav>
+
         </aside>
 
         <main class="admin-main">
+
             <header class="admin-header">
                 <div>
                     <h1>Gerenciar Setores</h1>
@@ -40,28 +50,40 @@
 
             <section class="admin-section">
                 <h2>Cadastrar Novo Setor</h2>
+
                 <div class="card p-4 mb-4">
+
                     <form id="formSetor" class="row g-3 align-items-end">
+                        
                         <div class="col-md-5">
                             <label class="form-label">Empresa</label>
+
                             <select id="selectEmpresa" class="form-select" required>
                                 <option value="">Selecione...</option>
                                 <% empresas.forEach(emp => { %>
                                     <option value="<%= emp.id %>"><%= emp.empresa %></option>
                                 <% }); %>
                             </select>
+
                         </div>
+
                         <div class="col-md-5">
                             <label class="form-label">Nome do Setor</label>
                             <input type="text" id="inputSetor" class="form-control" required>
                         </div>
+
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
                         </div>
+
                     </form>
+
                 </div>
+
             </section>
+
         </main>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>

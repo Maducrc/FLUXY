@@ -46,7 +46,7 @@ async function excluirEmpresa(botao) {
     const nome = botao.dataset.nome;
 
     if (confirm(`Tem certeza que deseja excluir a empresa "${nome}"?\n\nAtenção: Todos os setores e usuários vinculados a ela também serão excluídos!`)) {
-        const resp = await fetch(`/empresas/${id}`, { method: 'DELETE' });
+        const resp = await fetch(`/empresas/${id}`, {method: 'DELETE'});
         const dados = await resp.json();
         
         if (dados.sucesso) { alert("Empresa excluída!"); location.reload(); } 

@@ -55,6 +55,7 @@ CREATE TABLE eventos (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
     FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );
+
 CREATE TABLE eventos_setores (
     evento_id INT,
     setor_id INT,
@@ -74,3 +75,6 @@ VALUES
 
 ALTER TABLE publicacoes
 ADD COLUMN criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE eventos
+ADD COLUMN concluido BOOLEAN NOT NULL DEFAULT FALSE;
