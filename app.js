@@ -770,43 +770,6 @@ app.get("/dashboard", verificarLogin, (req, res) => {
 
 });
 
-app.get("/setor/:nome", verificarLogin, (req, res) => {
-
-    const setorNome = req.params.nome;
-
-    const sql = `
-        SELECT * FROM setores WHERE LOWER(setor) = LOWER(?) 
-    `;
-
-    db.query(sql, [setorNome], (erro, resultados) => {
-
-        if(erro) {
-            console.error("Erro ao buscar setor: ", erro);
-            return res.status(500).send("Erro ao buscar setor.");
-        }
-
-        if(resultados.length === 0) {
-            return res.status(404).send("Setor não encontrado.");
-        }
-
-        const setor = resultados[0];
-if (setor.id !== req.session.usuario.setor_id) {
-
-    return res.status(403).send(
-        "Você não tem acesso a este setor."
-    );
-
-}
-
-res.render("setor", {
-    usuario: req.session.usuario,
-    setor: setor
-});
-
-    });
-
-});
-
 app.get("/usuario-logado", (req, res) => {
 
     if (!req.session.usuario) {
@@ -1344,6 +1307,206 @@ app.get("/agenda-geral", verificarLogin, (req, res) => {
         }));
 
         res.json(eventosFormatados);
+    });
+});
+app.get("/acompanhamentos", verificarLogin, (req, res) => {
+    if (req.session.usuario.perfil === 'administrador') {
+        return res.redirect("/admin");
+    }
+
+    const usuarioId = req.session.usuario.id;
+
+    const sql = `
+        SELECT 
+            usuarios.id,
+            usuarios.nome,
+            usuarios.usuario,
+            usuarios.sigla,
+            usuarios.perfil,
+            empresas.empresa AS empresa,
+            setores.setor AS setor
+        FROM usuarios
+        LEFT JOIN empresas ON usuarios.empresa_id = empresas.id
+        LEFT JOIN setores ON usuarios.setor_id = setores.id
+        WHERE usuarios.id = ?
+    `;
+
+    db.query(sql, [usuarioId], (erro, resultados) => {
+        if (erro) {
+            console.error("Erro ao buscar dados do usuário:", erro);
+            return res.status(500).send("Erro ao carregar acompanhamentos.");
+        }
+
+        if (resultados.length === 0) {
+            return res.redirect("/logout");
+        }
+
+        res.render("acompanhamentos", {
+            usuario: resultados[0]
+        });
+    });
+});
+
+app.get("/setor", verificarLogin, (req, res) => {
+    if (req.session.usuario.perfil === 'administrador') {
+        return res.redirect("/admin");
+    }
+
+    const usuarioId = req.session.usuario.id;
+
+    const sql = `
+        SELECT 
+            usuarios.id,
+            usuarios.nome,
+            usuarios.usuario,
+            usuarios.sigla,
+            usuarios.perfil,
+            empresas.empresa AS empresa,
+            setores.id AS setor_id,
+            setores.setor AS setor
+        FROM usuarios
+        LEFT JOIN empresas ON usuarios.empresa_id = empresas.id
+        LEFT JOIN setores ON usuarios.setor_id = setores.id
+        WHERE usuarios.id = ?
+    `;
+
+    db.query(sql, [usuarioId], (erro, resultados) => {
+        if (erro) {
+            console.error("Erro ao buscar dados do setor:", erro);
+            return res.status(500).send("Erro ao carregar setor.");
+        }
+
+        if (resultados.length === 0) {
+            return res.redirect("/logout");
+        }
+
+        const dadosUsuario = resultados[0];
+
+        if (!dadosUsuario.setor) {
+            return res.status(404).send("Setor não encontrado.");
+        }
+
+        res.render("setor", {
+            usuario: dadosUsuario,
+            setor: {
+                id: dadosUsuario.setor_id,
+                setor: dadosUsuario.setor
+            }
+        });
+    });
+});
+
+app.get("/pendencias", verificarLogin, (req, res) => {
+    if (req.session.usuario.perfil === 'administrador') {
+        return res.redirect("/admin");
+    }
+
+    const usuarioId = req.session.usuario.id;
+
+    const sql = `
+        SELECT 
+            usuarios.id,
+            usuarios.nome,
+            usuarios.usuario,
+            usuarios.sigla,
+            usuarios.perfil,
+            empresas.empresa AS empresa,
+            setores.setor AS setor
+        FROM usuarios
+        LEFT JOIN empresas ON usuarios.empresa_id = empresas.id
+        LEFT JOIN setores ON usuarios.setor_id = setores.id
+        WHERE usuarios.id = ?
+    `;
+
+    db.query(sql, [usuarioId], (erro, resultados) => {
+        if (erro) {
+            console.error("Erro ao buscar dados do usuário:", erro);
+            return res.status(500).send("Erro ao carregar pendências.");
+        }
+
+        if (resultados.length === 0) {
+            return res.redirect("/logout");
+        }
+
+        res.render("pendencias", {
+            usuario: resultados[0]
+        });
+    });
+});
+
+app.get("/indicadores", verificarLogin, (req, res) => {
+    if (req.session.usuario.perfil === 'administrador') {
+        return res.redirect("/admin");
+    }
+
+    const usuarioId = req.session.usuario.id;
+
+    const sql = `
+        SELECT 
+            usuarios.id,
+            usuarios.nome,
+            usuarios.usuario,
+            usuarios.sigla,
+            usuarios.perfil,
+            empresas.empresa AS empresa,
+            setores.setor AS setor
+        FROM usuarios
+        LEFT JOIN empresas ON usuarios.empresa_id = empresas.id
+        LEFT JOIN setores ON usuarios.setor_id = setores.id
+        WHERE usuarios.id = ?
+    `;
+
+    db.query(sql, [usuarioId], (erro, resultados) => {
+        if (erro) {
+            console.error("Erro ao buscar dados do usuário:", erro);
+            return res.status(500).send("Erro ao carregar indicadores.");
+        }
+
+        if (resultados.length === 0) {
+            return res.redirect("/logout");
+        }
+
+        res.render("indicadores", {
+            usuario: resultados[0]
+        });
+    });
+});
+
+app.get("/configuracoes", verificarLogin, (req, res) => {
+    if (req.session.usuario.perfil === "administrador") {
+        return res.redirect("/admin");
+    }
+
+    const usuarioId = req.session.usuario.id;
+
+    const sql = `
+        SELECT 
+            usuarios.id,
+            usuarios.nome,
+            usuarios.usuario,
+            usuarios.sigla,
+            usuarios.perfil,
+            empresas.empresa AS empresa,
+            setores.setor AS setor
+        FROM usuarios
+        LEFT JOIN empresas ON usuarios.empresa_id = empresas.id
+        LEFT JOIN setores ON usuarios.setor_id = setores.id
+        WHERE usuarios.id = ?
+    `;
+
+    db.query(sql, [usuarioId], (erro, resultados) => {
+        if (erro) {
+            console.error("Erro ao buscar dados do usuário:", erro);
+            return res.status(500).send("Erro ao carregar configurações.");
+        }
+
+        if (resultados.length === 0) {
+            return res.redirect("/logout");
+        }
+
+        res.render("configuracoes", {
+            usuario: resultados[0]
+        });
     });
 });
 

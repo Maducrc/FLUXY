@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicadores</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" href="/css/inicio.css">
+    <link rel="stylesheet" href="/css/modal.css">
+</head>
+<body>
+
+    <div class="layout">
+
+        <!-- Inicio SideBar-->
+        <aside class="sidebar">
+
+            <div class="logo">
+                <img src="/img/logo.png" alt="Fluxy">
+            </div>
+
+            <nav class="menu">
+
+                <a href="/dashboard" class="menu-item">
+                    <i class="bi bi-house-door"></i>
+                    <span>Geral</span>
+                </a>
+
+                <a href="/acompanhamentos" class="menu-item">
+                    <i class="bi bi-chat-square-text"></i>
+                    <span>Acompanhamentos</span>
+                </a>
+
+                <div class="setor">
+
+                    <a href="/setor" class="menu-item">
+                        <i class="bi bi-diagram-3"></i>
+                        <span><%= usuario.setor %></span>
+                    </a>
+
+                    <a href="/calendario" class="menu-item">
+                        <i class="bi bi-calendar3"></i>
+                        <span>Calendário</span>
+                    </a>
+
+                    <a href="/pendencias" class="menu-item">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <span>Pendências</span>
+                    </a>
+
+                    <a href="/indicadores" class="menu-item ativo">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span>Indicadores</span>
+                    </a>
+
+                </div>
+
+            </nav>
+
+            <div class="menu-final">
+
+                <a href="/configuracoes" class="menu-item">
+                    <i class="bi bi-gear"></i>
+                    <span>Configurações</span>
+                </a>
+
+                <a href="/logout" class="menu-item" id="btnLogout">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sair</span>
+                </a>
+
+            </div>
+
+        </aside>
+        <!-- Fim SideBar-->
+
+        <!-- Início Conteúdo Principal-->
+        <main class="conteudo">
+
+            <header class="topo">
+
+                <div>
+                    <h1>Indicadores</h1>
+                </div>
+
+            </header>
+
+        </main>
+        <!-- Fim Conteúdo Principal-->
+
+    </div>
+
+    <script src="/js/indicadores.js"></script>
+    <script src="/js/logout.js"></script>
+</body>
+</html>
