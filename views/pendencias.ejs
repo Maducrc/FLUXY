@@ -5,20 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pendências</title>
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <link rel="stylesheet" href="/css/inicio.css">
     <link rel="stylesheet" href="/css/modal.css">
+    <link rel="stylesheet" href="/css/pendencias.css">
 </head>
 <body>
 
     <div class="layout">
 
-        <!-- Inicio SideBar-->
+        <!-- Início Sidebar -->
         <aside class="sidebar">
 
             <div class="logo">
@@ -64,35 +62,172 @@
             </nav>
 
             <div class="menu-final">
-
                 <a href="/configuracoes" class="menu-item">
                     <i class="bi bi-gear"></i>
                     <span>Configurações</span>
                 </a>
-
                 <a href="/logout" class="menu-item" id="btnLogout">
                     <i class="bi bi-box-arrow-right"></i>
                     <span>Sair</span>
                 </a>
-
             </div>
 
         </aside>
-        <!-- Fim SideBar-->
+        <!-- Fim Sidebar -->
 
-        <!-- Início Conteúdo Principal-->
+        <!-- Início Conteúdo Principal -->
         <main class="conteudo">
 
             <header class="topo">
-
                 <div>
                     <h1>Pendências</h1>
+                    <p class="text-muted">Acompanhe as prioridades do seu setor.</p>
                 </div>
-
             </header>
 
+            <section class="formulario mb-4">
+                <h2 class="h5 mb-3">Nova pendência</h2>
+
+                <form id="formPendencia" class="row g-3">
+
+                    <div class="col-12">
+                        <label for="titulo" class="form-label">Título</label>
+                        <input id="titulo" name="titulo" class="form-control" maxlength="150" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="descricao" class="form-label">Descrição</label>
+                        <textarea id="descricao" name="descricao" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="prazo" class="form-label">Prazo</label>
+                        <input id="prazo" name="prazo" type="date" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="impacto" class="form-label">Impacto (0 a 10)</label>
+                        <input id="impacto" name="impacto" type="number" min="0" max="10" step="1"
+                               value="5" class="form-control" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">
+                            Pendências que esta vai bloquear
+                            <small class="text-muted fw-normal">(opcional — selecione quantas quiser)</small>
+                        </label>
+
+                        <% if (!pendencias || pendencias.length === 0) { %>
+                            <p class="text-muted small mb-0 p-3 bloqueadas-vazio">
+                                Nenhuma outra pendência cadastrada ainda.
+                            </p>
+                        <% } else { %>
+                            <div class="bloqueadas-lista">
+                                <% pendencias.forEach(p => { %>
+                                    <label class="bloqueada-item">
+                                        <input type="checkbox" name="bloqueadas" value="<%= p.id %>">
+                                        <div class="bloqueada-info">
+                                            <span class="titulo"><%= p.titulo %></span>
+                                            <span class="prazo">
+                                                Prazo: <%= new Date(p.prazo).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) %>
+                                            </span>
+                                        </div>
+                                    </label>
+                                <% }) %>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Cadastrar pendência
+                        </button>
+                    </div>
+
+                </form>
+            </section>
+
+            <section class="lista">
+                <h2 class="h5 mb-3">Prioridades atuais</h2>
+
+                <% if (!pendencias || pendencias.length === 0) { %>
+                    <p class="text-muted">Não há pendências cadastradas.</p>
+                <% } else { %>
+                    <div class="row g-3">
+                        <% pendencias.forEach(item => { %>
+                            <div class="col-md-6">
+                                <article class="card dependencia h-100">
+                                    <div class="card-body">
+
+                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                            <span class="indicador <%= item.cor %>" aria-hidden="true"></span>
+                                            <h3 class="h6 mb-0"><%= item.titulo %></h3>
+                                        </div>
+
+                                        <p class="small text-muted mb-2">
+                                            <%= item.descricao || 'Sem descrição' %>
+                                        </p>
+
+                                        <p class="small mb-1">
+                                            <strong>Prazo:</strong>
+                                            <%= new Date(item.prazo).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) %>
+                                        </p>
+
+                                        <p class="small mb-1">
+                                            <strong>Bloqueia:</strong>
+                                            <% if (item.bloqueadas_count > 0) { %>
+                                                <span title="<%= item.bloqueadas_titulos %>">
+                                                    <%= item.bloqueadas_count %> pendência(s)
+                                                </span>
+                                            <% } else { %>
+                                                <span class="text-muted">nenhuma</span>
+                                            <% } %>
+                                        </p>
+
+                                        <% if (item.bloqueadores_count > 0) { %>
+                                            <p class="small mb-1 texto-bloqueado">
+                                                <i class="bi bi-lock-fill"></i>
+                                                <strong>Aguardando:</strong>
+                                                <span title="<%= item.bloqueadores_titulos %>">
+                                                    <%= item.bloqueadores_titulos %>
+                                                </span>
+                                            </p>
+                                        <% } %>
+
+                                        <p class="small mb-3">
+                                            <strong>Pontuação:</strong> <%= item.pontuacao.toFixed(2) %>
+                                        </p>
+
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge-prioridade <%= item.cor %>">
+                                                <%= item.prioridade %> prioridade
+                                            </span>
+
+                                            <% if (item.bloqueadores_count > 0) { %>
+                                                <button class="btn btn-sm btn-resolver-bloqueado"
+                                                        type="button"
+                                                        disabled
+                                                        title="Resolva primeiro: <%= item.bloqueadores_titulos %>">
+                                                    <i class="bi bi-lock"></i> Bloqueada
+                                                </button>
+                                            <% } else { %>
+                                                <button class="btn btn-sm btn-resolver"
+                                                        type="button"
+                                                        data-id="<%= item.id %>">
+                                                    <i class="bi bi-check2-circle"></i> Resolver
+                                                </button>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } %>
+            </section>
+
         </main>
-        <!-- Fim Conteúdo Principal-->
+        <!-- Fim Conteúdo Principal -->
 
     </div>
 

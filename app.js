@@ -2,6 +2,7 @@
 const express = require("express");
 const db = require("./config/database");
 const bcrypt = require("bcrypt");
+const calcularSemaforo = require("./utils/semaforo");
 const session = require("express-session");
 
 //fixo
@@ -1402,8 +1403,9 @@ app.get("/pendencias", verificarLogin, (req, res) => {
     }
 
     const usuarioId = req.session.usuario.id;
+    const empresaId = req.session.usuario.empresa_id;
 
-    const sql = `
+    const sqlUsuario = `
         SELECT 
             usuarios.id,
             usuarios.nome,
@@ -1418,18 +1420,282 @@ app.get("/pendencias", verificarLogin, (req, res) => {
         WHERE usuarios.id = ?
     `;
 
-    db.query(sql, [usuarioId], (erro, resultados) => {
+    db.query(sqlUsuario, [usuarioId], (erro, resultados) => {
         if (erro) {
             console.error("Erro ao buscar dados do usuário:", erro);
             return res.status(500).send("Erro ao carregar pendências.");
         }
-
         if (resultados.length === 0) {
             return res.redirect("/logout");
         }
 
-        res.render("pendencias", {
-            usuario: resultados[0]
+        const dadosUsuario = resultados[0];
+
+        const sqlPendencias = `
+            SELECT 
+                p.id,
+                p.titulo,
+                p.descricao,
+                p.prazo,
+                p.impacto,
+                p.status,
+                p.criado_em,
+                u.nome  AS autor_nome,
+                u.sigla AS autor_sigla,
+                (
+                    SELECT COUNT(*)
+                    FROM pendencias_bloqueadas pb
+                    INNER JOIN pendencias bl ON pb.pendencia_bloqueada_id = bl.id
+                    WHERE pb.pendencia_id = p.id
+                    AND bl.status = 'pendente'
+                ) AS bloqueadas_count,
+                (
+                    SELECT GROUP_CONCAT(bl.titulo SEPARATOR ', ')
+                    FROM pendencias_bloqueadas pb
+                    INNER JOIN pendencias bl ON pb.pendencia_bloqueada_id = bl.id
+                    WHERE pb.pendencia_id = p.id
+                    AND bl.status = 'pendente'
+                ) AS bloqueadas_titulos,
+                (
+                    SELECT COUNT(*)
+                    FROM pendencias_bloqueadas pbk
+                    INNER JOIN pendencias bloq ON pbk.pendencia_id = bloq.id
+                    WHERE pbk.pendencia_bloqueada_id = p.id
+                    AND bloq.status = 'pendente'
+                ) AS bloqueadores_count,
+                (
+                    SELECT GROUP_CONCAT(bloq.titulo SEPARATOR ', ')
+                    FROM pendencias_bloqueadas pbk
+                    INNER JOIN pendencias bloq ON pbk.pendencia_id = bloq.id
+                    WHERE pbk.pendencia_bloqueada_id = p.id
+                    AND bloq.status = 'pendente'
+                ) AS bloqueadores_titulos
+            FROM pendencias p
+            INNER JOIN usuarios u ON p.usuario_id = u.id
+            WHERE p.empresa_id = ?
+            AND p.status = 'pendente'
+            ORDER BY p.prazo ASC
+        `;
+
+        db.query(sqlPendencias, [empresaId], (erroP, pendencias) => {
+            if (erroP) {
+                console.error("Erro ao buscar pendências:", erroP);
+                return res.status(500).send("Erro ao carregar pendências.");
+            }
+
+            const lista = pendencias.map(item => ({
+                ...item,
+                ...calcularSemaforo(item)  
+            }));
+
+            const ordem = { vermelho: 0, amarelo: 1, verde: 2 };
+            lista.sort((a, b) => {
+                const diffCor = ordem[a.cor] - ordem[b.cor];
+                if (diffCor !== 0) return diffCor;
+                return new Date(a.prazo) - new Date(b.prazo);
+            });
+
+            res.render("pendencias", {
+                usuario: dadosUsuario,
+                pendencias: lista
+            });
+        });
+    });
+});
+
+app.post("/pendencias", verificarLogin, (req, res) => {
+    if (req.session.usuario.perfil === 'administrador') {
+        return res.status(403).json({ sucesso: false, mensagem: "Acesso não autorizado." });
+    }
+
+    const { titulo, descricao, prazo, impacto, bloqueadas } = req.body;
+    const usuarioId = req.session.usuario.id;
+    const empresaId = req.session.usuario.empresa_id;
+
+    const notaImpacto = Number(impacto);
+
+    if (
+        typeof titulo !== 'string' || !titulo.trim() ||
+        titulo.trim().length > 150 ||
+        typeof prazo !== 'string' ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(prazo) ||
+        !Number.isFinite(Date.parse(prazo + 'T00:00:00')) ||
+        !Number.isInteger(notaImpacto) || notaImpacto < 0 || notaImpacto > 10 ||
+        (descricao != null && typeof descricao !== 'string')
+    ) {
+        return res.status(400).json({ sucesso: false, mensagem: "Verifique os dados informados." });
+    }
+
+    let listaBloqueadas = [];
+    if (bloqueadas != null && bloqueadas !== '') {
+        const raw = Array.isArray(bloqueadas) ? bloqueadas : [bloqueadas];
+        listaBloqueadas = [...new Set(raw.map(Number))];
+
+        for (const id of listaBloqueadas) {
+            if (!Number.isInteger(id) || id <= 0) {
+                return res.status(400).json({
+                    sucesso: false,
+                    mensagem: "IDs de pendências inválidos."
+                });
+            }
+        }
+    }
+
+    const query = (sql, params = []) => new Promise((resolve, reject) => {
+        db.query(sql, params, (erro, resultado) => {
+            if (erro) return reject(erro);
+            resolve(resultado);
+        });
+    });
+
+    db.beginTransaction(async (erroTransacao) => {
+        if (erroTransacao) {
+            console.error("Erro ao iniciar transação:", erroTransacao);
+            return res.status(500).json({ sucesso: false, mensagem: "Erro ao cadastrar pendência." });
+        }
+
+        try {
+            if (listaBloqueadas.length > 0) {
+                const placeholders = listaBloqueadas.map(() => '?').join(',');
+                const existentes = await query(
+                    `SELECT id FROM pendencias
+                     WHERE id IN (${placeholders})
+                       AND empresa_id = ?
+                       AND status = 'pendente'`,
+                    [...listaBloqueadas, empresaId]
+                );
+
+                if (existentes.length !== listaBloqueadas.length) {
+                    throw Object.assign(
+                        new Error("Uma ou mais pendências selecionadas não existem ou já foram resolvidas."),
+                        { status: 400 }
+                    );
+                }
+            }
+
+            const resultado = await query(
+                `INSERT INTO pendencias
+                    (empresa_id, usuario_id, titulo, descricao, prazo, impacto)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [
+                    empresaId,
+                    usuarioId,
+                    titulo.trim(),
+                    (descricao || '').trim(),
+                    prazo,
+                    notaImpacto
+                ]
+            );
+
+            const novaPendenciaId = resultado.insertId;
+
+            if (listaBloqueadas.length > 0) {
+                const valores = listaBloqueadas.map(id => [novaPendenciaId, id]);
+                await query(
+                    `INSERT INTO pendencias_bloqueadas
+                        (pendencia_id, pendencia_bloqueada_id)
+                     VALUES ?`,
+                    [valores]
+                );
+            }
+
+            db.commit((erroCommit) => {
+                if (erroCommit) {
+                    return db.rollback(() => {
+                        console.error("Erro ao confirmar cadastro:", erroCommit);
+                        res.status(500).json({ sucesso: false, mensagem: "Erro ao cadastrar pendência." });
+                    });
+                }
+                res.json({
+                    sucesso: true,
+                    mensagem: "Pendência cadastrada com sucesso!",
+                    id: novaPendenciaId
+                });
+            });
+
+        } catch (erro) {
+            db.rollback(() => {
+                console.error("Erro ao cadastrar pendência:", erro);
+                res.status(erro.status || 500).json({
+                    sucesso: false,
+                    mensagem: erro.status ? erro.message : "Erro ao cadastrar pendência."
+                });
+            });
+        }
+    });
+});
+
+app.patch("/pendencias/:id/resolver", verificarLogin, (req, res) => {
+    if (req.session.usuario.perfil === 'administrador') {
+        return res.status(403).json({ sucesso: false, mensagem: "Acesso não autorizado." });
+    }
+
+    const pendenciaId = Number(req.params.id);
+    const empresaId   = req.session.usuario.empresa_id;
+
+    if (!Number.isInteger(pendenciaId) || pendenciaId <= 0) {
+        return res.status(400).json({ sucesso: false, mensagem: "Pendência inválida." });
+    }
+
+    const sqlVerifica = `
+        SELECT id FROM pendencias
+        WHERE id = ? AND empresa_id = ? AND status = 'pendente'
+    `;
+
+    db.query(sqlVerifica, [pendenciaId, empresaId], (erro, resultados) => {
+        if (erro) {
+            console.error("Erro ao verificar pendência:", erro);
+            return res.status(500).json({ sucesso: false, mensagem: "Erro ao resolver pendência." });
+        }
+
+        if (resultados.length === 0) {
+            return res.status(404).json({
+                sucesso: false,
+                mensagem: "Pendência não encontrada ou já resolvida."
+            });
+        }
+
+        const sqlBloqueadores = `
+            SELECT p.titulo
+            FROM pendencias_bloqueadas pb
+            INNER JOIN pendencias p ON pb.pendencia_id = p.id
+            WHERE pb.pendencia_bloqueada_id = ?
+              AND p.status = 'pendente'
+        `;
+
+        db.query(sqlBloqueadores, [pendenciaId], (erroB, bloqueadores) => {
+            if (erroB) {
+                console.error("Erro ao verificar bloqueadores:", erroB);
+                return res.status(500).json({ sucesso: false, mensagem: "Erro ao resolver pendência." });
+            }
+
+            if (bloqueadores.length > 0) {
+                return res.status(409).json({
+                    sucesso: false,
+                    mensagem: "Não é possível resolver esta pendência ainda. Resolva primeiro:",
+                    bloqueadores: bloqueadores.map(b => b.titulo)
+                });
+            }
+
+            const sqlUpdate = `
+                UPDATE pendencias
+                SET status = 'resolvida'
+                WHERE id = ? AND empresa_id = ? AND status = 'pendente'
+            `;
+
+            db.query(sqlUpdate, [pendenciaId, empresaId], (erroU, resultadoU) => {
+                if (erroU) {
+                    console.error("Erro ao resolver pendência:", erroU);
+                    return res.status(500).json({ sucesso: false, mensagem: "Erro ao resolver pendência." });
+                }
+                if (resultadoU.affectedRows === 0) {
+                    return res.status(404).json({
+                        sucesso: false,
+                        mensagem: "Pendência não encontrada ou já resolvida."
+                    });
+                }
+                res.json({ sucesso: true, mensagem: "Pendência resolvida!" });
+            });
         });
     });
 });
